@@ -1,0 +1,44 @@
+For each supplied file:
+- Listing of total number of words
+- Number of words beginning with a vowel
+- Number of words ending with a consonant for each of the supplied files
+
+
+- Non case-sensitive
+- A word is defined as any sequence of characters, consisting of alphanumeric or
+underscore characters delimited by white spaces and separation or punctuation
+symbols.
+
+á, à, â, ã -> a
+é, è, ê -> e
+í, ì -> i
+ó, ò, ô, õ -> o 
+ú, ù -> u
+ç -> c
+
+White space: 
+- Space character (0x20)
+- A tab character (0x9)
+- A newline character (0xA) 
+- A carriage return character (0xD)
+
+Separation symbol:
+- Hyphen (-)
+- Double quotation mark (" 0x22 - “ 0xE2809C - ” 0xe2809D)
+- Bracket ([ ]) 
+- Parentheses (( ))    
+
+Punctuation symbol:
+- Full point (.)
+- Comma (,)
+- Colon (:)
+- Semicolon (;)
+- Question mark (?)
+- Exclamation point (!)
+- Dash (—, 0xE28093)
+- Ellipsis (…, 0xE280A6)
+
+The apostrophe (' 0x27) and single quotation marks (‘ 0xE28098 - ’ 0xE28099)
+are considered here to merge two words into a single one.
+
+
