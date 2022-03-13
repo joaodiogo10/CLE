@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 // Space character (0x20)
 // A tab character (0x9)
@@ -39,6 +40,9 @@ const unsigned int vowels[] = {0x61, 0xC3A1, 0xC3A0, 0xC3A2, 0xC3A3, 0x41, 0xC38
                                0x6F, 0xC3B3, 0xC3B2, 0xC3B4, 0xC3B5, 0x4F, 0xC393, 0xC392, 0xC394, 0xC395, // o
                                0x75, 0xC3BA, 0xC3B9, 0x55, 0xC39A, 0xC399};                                // u
 
+//apostrophe (' 0x27)
+const unsigned int apostrophe = 0x27;
+
 #define ASCII_FIRST_UPPER_CASE_LETTER 0x41
 #define ASCII_LAST_UPPER_CASE_LETTER 0x5A
 
@@ -51,79 +55,95 @@ enum CharacterType
     VOWEL,
     DELIMITER,
     EOFILE,
+    APOSTROPHE,
     ERROR
 };
 
 enum CharacterType readUTF8Char(FILE *ptrFile);
-void printResults(unsigned int totalWords, unsigned int totalWordsEndingInConsoant, unsigned int totalWordsBeginningInVowel);
 
-// TO DO:
-//  - Deal with '' character
-//  - Deal with multiple files
-int main()
+int main(int argc, char *argv[])
 {
-    FILE *ptrFile;
-    ptrFile = fopen("test.txt", "rb");
-    if (ptrFile == NULL)
+    if(argc < 2)
     {
-        printf(stderr, "Error opening the file!\n");
+        fprintf(stderr, "USAGE: ./countWords filePath [filePath ...]\n");
         return 1;
     }
 
-    enum CharacterType type = readUTF8Char(ptrFile);
-    // no words
-    if (type == EOF)
+    for(int i = 1; i < argc; i++) //for each filePath
     {
-        printResults(0, 0, 0);
-        return 0;
-    }
-
-    unsigned int totalWords = 0;
-    unsigned int totalWordsEndingInConsoant = 0;
-    unsigned int totalWordsBeginningInVowel = 0;
-
-    enum CharacterType lastCharacterType = DELIMITER;
-
-    while (type != EOFILE)
-    {
-        switch (type)
+        char* filePath = argv[i]; 
+        FILE *ptrFile;
+        ptrFile = fopen(filePath, "rb");
+        if (ptrFile == NULL)
         {
-        case VOWEL:
-            if (lastCharacterType == DELIMITER)
-                totalWordsBeginningInVowel++;
-            break;
-
-        // New word condition
-        case DELIMITER:
-            if (lastCharacterType == CONSOANT)
-                totalWordsEndingInConsoant++;
-            if (lastCharacterType != DELIMITER)
-                totalWords++;
-            break;
-
-        case ERROR:
-            printf(stderr, "Error reading character!\n");
-            break;
-
-        default:
-            break;
+            fprintf(stderr, "Error opening file \"%s\"!\n", filePath);
+            return 1;
         }
-        lastCharacterType = type;
-        type = readUTF8Char(ptrFile);
-    }
 
-    fclose(ptrFile);
-    printResults(totalWords, totalWordsBeginningInVowel, totalWordsEndingInConsoant);
-    return 0;
-}
+        unsigned int totalWords = 0;
+        unsigned int totalWordsEndingInConsoant = 0;
+        unsigned int totalWordsBeginningInVowel = 0;
+        enum CharacterType type = readUTF8Char(ptrFile);
+        enum CharacterType lastCharacterType = DELIMITER;
 
-void printResults(unsigned int totalWords, unsigned int totalWordsEndingInConsoant, unsigned int totalWordsBeginningInVowel)
-{
-    printf(stdout,
+        bool mergeWord = false;
+
+        while (type != EOFILE)
+        {
+            switch (type)
+            {
+            
+            case APOSTROPHE:
+                if(mergeWord == true) //end merged word
+                    mergeWord = false;
+                else //beginning of merged word
+                    mergeWord = true;
+                
+                //lastCharacterType = lastCharacterType; keep lastCharacterType
+                break; 
+            
+            case VOWEL:
+                if ((mergeWord == false && lastCharacterType == DELIMITER))
+                    totalWordsBeginningInVowel++;
+                
+                lastCharacterType = VOWEL;
+                break;
+            
+            case DELIMITER:
+                //increment word count
+                if(mergeWord == false && lastCharacterType != DELIMITER)
+                {
+                    if (lastCharacterType == CONSOANT) //check consoant
+                        totalWordsEndingInConsoant++;
+                    totalWords++;
+                }
+
+                lastCharacterType = DELIMITER;
+                break;
+
+            case CONSOANT:
+                lastCharacterType = CONSOANT;
+                break;
+
+            case ERROR:
+                fprintf(stderr, "Error reading character!\n");
+                break;
+            }
+
+            type = readUTF8Char(ptrFile);
+        }
+
+        fclose(ptrFile);
+        //print results
+        fprintf(stdout,
+           "------File %s results------\n"
            "Total words: %d\n"
            "Total words beginning in vowel: %d\n"
            "Total words ending in consoant: %d\n",
-           totalWords, totalWordsBeginningInVowel, totalWordsEndingInConsoant);
+           filePath, totalWords, totalWordsBeginningInVowel, totalWordsEndingInConsoant);
+    }
+    
+    return 0;
 }
 
 enum CharacterType readUTF8Char(FILE *ptrFile)
@@ -182,18 +202,22 @@ enum CharacterType readUTF8Char(FILE *ptrFile)
         return ERROR;
     }
 
-    // Check if is a vowel
-    for (int i = 0; i < sizeof(vowels) / sizeof(*vowels); i++)
-    {
-        if (vowels[i] == utf8Char)
-            return VOWEL;
-    }
-
     // Check if is a delimiter
     for (int i = 0; i < sizeof(delimiters) / sizeof(*delimiters); i++)
     {
         if (delimiters[i] == utf8Char)
             return DELIMITER;
+    }
+
+    // Check if is an apostrophe
+    if(apostrophe == utf8Char)
+        return APOSTROPHE;
+
+    // Check if is a vowel
+    for (int i = 0; i < sizeof(vowels) / sizeof(*vowels); i++)
+    {
+        if (vowels[i] == utf8Char)
+            return VOWEL;
     }
 
     // Check if is a consoant
@@ -204,8 +228,8 @@ enum CharacterType readUTF8Char(FILE *ptrFile)
             return CONSOANT;
         }
     }
-    if ((ASCII_LAST_LOWER_CASE_LETTER > utf8Char && utf8Char > ASCII_FIRST_LOWER_CASE_LETTER) ||
-        (ASCII_LAST_UPPER_CASE_LETTER > utf8Char && utf8Char > ASCII_FIRST_UPPER_CASE_LETTER))
+    if ((ASCII_LAST_LOWER_CASE_LETTER >= utf8Char && utf8Char >= ASCII_FIRST_LOWER_CASE_LETTER) ||
+        (ASCII_LAST_UPPER_CASE_LETTER >= utf8Char && utf8Char >= ASCII_FIRST_UPPER_CASE_LETTER))
     {
         return CONSOANT;
     }
