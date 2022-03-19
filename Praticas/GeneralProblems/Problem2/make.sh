@@ -1,0 +1,1 @@
+gcc main.c -Wall -o computeDeterminant

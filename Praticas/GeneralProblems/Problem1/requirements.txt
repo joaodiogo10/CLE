@@ -6,7 +6,7 @@ For each supplied file:
 
 - Non case-sensitive
 - A word is defined as any sequence of characters, consisting of alphanumeric or
-underscore characters delimited by white spaces and separation or punctuation
+underscore (_) characters delimited by white spaces and separation or punctuation
 symbols.
 
 á, à, â, ã -> a
