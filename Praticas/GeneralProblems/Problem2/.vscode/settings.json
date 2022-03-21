@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.txt": "plaintext",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "stdbool.h": "c"
     }
 }

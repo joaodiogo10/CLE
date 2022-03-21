@@ -47,15 +47,14 @@ int main(int argc, char *argv[])
     {
         for(int col = 0; col < order; col++)
         {
-            char bytes[8];
-            fread(&bytes, 8, 1, ptrFile);
+            double tmp;
+            fread(&tmp, 8, 1, ptrFile);
             if (ferror(ptrFile) != 0 || feof(ptrFile))
             {
                 fprintf(stderr, "Error parsing matrix entries, verify file format\n");
                 return EXIT_FAILURE;
             }
-            double a = *((double*)bytes);
-            m[row][col] = a;
+            m[row][col] = tmp;
         }
     }
 
@@ -68,7 +67,7 @@ int main(int argc, char *argv[])
             printf("%f ", m[row][col]);
         }
     }*/
-
+    
     for(int matrix = 0; matrix < nMatrices ; matrix++) //for each matrix
     { 
         printf("\n----Computing matrix %d----\n", matrix + 1);
@@ -76,13 +75,13 @@ int main(int argc, char *argv[])
         unsigned int nSwap = 0;
 
         //perform gausian elimination
-        for(int i = 0; i < order - 1; i++) 
+        for(int i = 0; i < order; i++) 
         {
             if(m[i][i] == 0) 
             {  
                 bool swapped = false; 
                 //find a col, j, whose coefficient m[i][j] != 0, for j > i. Then swap cols
-                for(int j = i+1; j < order; i++) 
+                for(int j = i+1; j < order; j++) 
                 {
                     if(m[i][j] != 0)
                     {
@@ -99,12 +98,13 @@ int main(int argc, char *argv[])
                     }
                 }
 
+                           
                 //all col's coefficients == 0 => determinant = 0 
-                if(swapped == false)
+                /*if(swapped == false)
                 {
                     determinant = 0;
                     break;
-                }
+                }*/
             }
             //apply transformation a_kj = a_kj - a_ki/a_ii * a_ij
             for(int k = i + 1; k < order; k++) //for all rows, k, below row i
@@ -114,15 +114,18 @@ int main(int argc, char *argv[])
                     m[k][j] = m[k][j] - m[k][i]/m[i][i] * m[i][j];
                 }
             }
+            printf("determinant: %e\n", determinant);
             //printf("%e\n", m[i][i]);
             //multiple diagonal
             determinant = determinant * m[i][i];
         }
 
         //determine determinant signal
-        determinant = -determinant ? nSwap % 2 == 1 : determinant;
+        determinant = ( nSwap % 2 == 1) ? -determinant : determinant;
 
         printf("Determinant: %e\n", determinant);
+
+        break;
     }
     return EXIT_SUCCESS;
 }

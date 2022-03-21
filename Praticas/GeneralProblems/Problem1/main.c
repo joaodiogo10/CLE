@@ -44,6 +44,9 @@ const unsigned int vowels[] = {0x61, 0xC3A1, 0xC3A0, 0xC3A2, 0xC3A3, 0x41, 0xC38
 // underscore (_ 0x5F)
 const unsigned int underscore = 0x5F;
 
+// apostrophe ('  0x27)
+const unsigned int apostrophe = 0x27;
+
 #define ASCII_FIRST_UPPER_CASE_LETTER 0x41
 #define ASCII_LAST_UPPER_CASE_LETTER 0x5A
 
@@ -55,6 +58,8 @@ enum CharacterType
     CONSOANT,
     UNDERSCORE,
     VOWEL,
+    DIGIT,
+    APOSTROPHE,
     DELIMITER,
     EOFILE,
     NOT_DEFINED,
@@ -86,40 +91,31 @@ int main(int argc, char *argv[])
         unsigned int totalWordsEndingInConsoant = 0;
         unsigned int totalWordsBeginningInVowel = 0;
         unsigned int utf8Char;
-        enum CharacterType type = readUTF8Char(ptrFile, &utf8Char);
-        enum CharacterType lastCharacterType = NOT_DEFINED;
+        enum CharacterType charType;
+        enum CharacterType lastCharType;
 
         bool inWord = false;
-
-        while (type != EOFILE)
+        do
         {
+            charType = readUTF8Char(ptrFile, &utf8Char);
             switch (inWord)
             {
             case false:
-                switch (type)
+                switch (charType)
                 {
-                case CONSOANT:
-                    totalWords++;
-                    inWord = true;
-                    break;
-
-                case UNDERSCORE:
-                    totalWords++;
-                    inWord = true;
-
-                    break;
-
                 case VOWEL:
-                    totalWords++;
                     totalWordsBeginningInVowel++;
+                case CONSOANT:
+                case UNDERSCORE:
+                case DIGIT:
+                    totalWords++;
                     inWord = true;
-
                     break;
 
                 case ERROR:
                     fprintf(stderr, "ERROR reading character");
                     break;
-
+                
                 default:
                     break;
                 }
@@ -127,10 +123,10 @@ int main(int argc, char *argv[])
                 break;
 
             case true:
-                switch (type)
+                switch (charType)
                 {
                 case DELIMITER:
-                    if(lastCharacterType == CONSOANT)
+                    if(lastCharType == CONSOANT)
                         totalWordsEndingInConsoant++;
                     
                     inWord = false;
@@ -139,7 +135,7 @@ int main(int argc, char *argv[])
                 case ERROR:
                     fprintf(stderr, "ERROR reading character");
                     break;
-                
+
                 default:
                     break;
                 }
@@ -162,52 +158,11 @@ int main(int argc, char *argv[])
             {
                 printf("Underscore\n");
             }*/
-            lastCharacterType = type;
-            type = readUTF8Char(ptrFile, &utf8Char);
-        }
-        /*while (type != EOFILE)
-        {
-            switch (type)
-            {
+            
+            if(charType != NOT_DEFINED && charType != ERROR) //ignore case NOT_DEFINED or ERROR
+                lastCharType = charType;
 
-            case APOSTROPHE:
-                lastCharacterType = APOSTROPHE;
-                break;
-
-            case VOWEL:
-                if (lastCharacterType == DELIMITER)
-                    totalWordsBeginningInVowel++;
-
-                lastCharacterType = VOWEL;
-                break;
-
-            case DELIMITER:
-                //increment word count
-                if(lastCharacterType != DELIMITER)
-                {
-                    if (lastCharacterType == CONSOANT) //check consoant
-                        totalWordsEndingInConsoant++;
-                    totalWords++;
-                }
-
-                lastCharacterType = DELIMITER;
-                break;
-
-            case CONSOANT:
-                lastCharacterType = CONSOANT;
-                break;
-
-            case NOT_DEFINED:
-                lastCharacterType = NOT_DEFINED;
-                break;
-
-            case ERROR:
-                fprintf(stderr, "Error reading character!\n");
-                break;
-            }
-
-            type = readUTF8Char(ptrFile, &utf8Char);
-        }*/
+        } while(charType != EOFILE);
 
         fclose(ptrFile);
         // print results
@@ -285,6 +240,10 @@ enum CharacterType readUTF8Char(FILE *ptrFile, unsigned int *utf8Char)
             return DELIMITER;
     }
 
+    //check if is a apostrophe
+    if(*utf8Char == apostrophe)
+        return APOSTROPHE;
+
     // Check if is a vowel
     for (int i = 0; i < sizeof(vowels) / sizeof(*vowels); i++)
     {
@@ -295,10 +254,8 @@ enum CharacterType readUTF8Char(FILE *ptrFile, unsigned int *utf8Char)
     // Check if is a consoant
     for (int i = 0; i < sizeof(specialConsoants) / sizeof(*specialConsoants); i++)
     {
-
         if (specialConsoants[i] == *utf8Char)
         {
-
             return CONSOANT;
         }
     }
@@ -308,6 +265,10 @@ enum CharacterType readUTF8Char(FILE *ptrFile, unsigned int *utf8Char)
         return CONSOANT;
     }
 
+    // Check if is a digit
+    if(*utf8Char >= 0x30 && *utf8Char <=0x39)
+        return DIGIT;
+    
     // Check if is an underscore
     if (*utf8Char == underscore)
     {
