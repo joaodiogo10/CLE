@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <time.h>
 
 // Space character (0x20)
 // A tab character (0x9)
@@ -70,14 +71,17 @@ enum CharacterType readUTF8Char(FILE *ptrFile, unsigned int *utf8Char);
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2)
+    if (argc == 1)
     {
         fprintf(stderr, "USAGE: ./countWords filePath [filePath ...]\n");
         return 1;
     }
 
+    double startTime = 0, endTime = 0, elapsedTime = 0;
+
     for (int i = 1; i < argc; i++) // for each filePath
     {
+        //open file
         char *filePath = argv[i];
         FILE *ptrFile;
         ptrFile = fopen(filePath, "rb");
@@ -93,8 +97,12 @@ int main(int argc, char *argv[])
         unsigned int utf8Char;
         enum CharacterType charType;
         enum CharacterType lastCharType;
-
         bool inWord = false;
+
+        
+        startTime = ( (double) clock()) / CLOCKS_PER_SEC;
+        
+        //Process file
         do
         {
             charType = readUTF8Char(ptrFile, &utf8Char);
@@ -164,16 +172,20 @@ int main(int argc, char *argv[])
 
         } while(charType != EOFILE);
 
+        endTime = ( (double) clock()) / CLOCKS_PER_SEC;
+        elapsedTime += endTime - startTime;
+
         fclose(ptrFile);
         // print results
         fprintf(stdout,
-                "------File %s results------\n"
-                "Total words: %d\n"
-                "Total words beginning in vowel: %d\n"
-                "Total words ending in consoant: %d\n\n",
+                "\nFile name: %s\n"
+                "Total number of words = %d\n"
+                "N. of words beginning with a vowel = %d\n"
+                "N. of words ending with a consonant = %d\n",
                 filePath, totalWords, totalWordsBeginningInVowel, totalWordsEndingInConsoant);
     }
 
+    printf("\nElapsed time = %.6f s\n", elapsedTime);
     return 0;
 }
 
