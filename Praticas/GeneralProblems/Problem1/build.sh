@@ -1,1 +1,1 @@
-gcc main.c -Wall -o countWords
+gcc main.c -Wall -O3 -o countWords

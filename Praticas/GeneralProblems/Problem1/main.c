@@ -192,15 +192,14 @@ int main(int argc, char *argv[])
 enum CharacterType readUTF8Char(FILE *ptrFile, unsigned int *utf8Char)
 {
     unsigned char buffer[3];
-    fread(&buffer, sizeof(char), 1, ptrFile);
+    if(fread(&buffer, sizeof(char), 1, ptrFile) != sizeof(char))
+    {
+        if (ferror(ptrFile) != 0)
+            return ERROR;
 
-    // error occured
-    if (ferror(ptrFile) != 0)
-        return ERROR;
-
-    // EOF
-    if (feof(ptrFile) != 0)
-        return EOFILE;
+        if (feof(ptrFile) != 0)
+            return EOFILE;
+    }
 
     unsigned char tmp = buffer[0] & 0xF8;
     *utf8Char = buffer[0];
@@ -211,30 +210,21 @@ enum CharacterType readUTF8Char(FILE *ptrFile, unsigned int *utf8Char)
     }
     else if (tmp >> 5 == 0b110) // 2 bytes character
     {
-        fread(&buffer, sizeof(char), 1, ptrFile);
-
-        // error occured
-        if (ferror(ptrFile) != 0 || feof(ptrFile) != 0)
+        if(fread(&buffer, sizeof(char), 1, ptrFile) != sizeof(char))
             return ERROR;
 
         *utf8Char = (*utf8Char << 8) | buffer[0];
     }
     else if (tmp >> 4 == 0b1110) // 3 bytes character
     {
-        fread(&buffer, sizeof(char), 2, ptrFile);
-
-        // error occured
-        if (ferror(ptrFile) != 0 || feof(ptrFile) != 0)
+        if(fread(&buffer, sizeof(char), 2, ptrFile) != sizeof(char) * 2)
             return ERROR;
 
         *utf8Char = (*utf8Char << 16) | (buffer[0] << 8) | buffer[1];
     }
     else if (tmp >> 3 == 0b1110) // 4 bytes character
     {
-        fread(&buffer, sizeof(char), 3, ptrFile);
-
-        // error occured
-        if (ferror(ptrFile) != 0 || feof(ptrFile) != 0)
+        if(fread(&buffer, sizeof(char), 3, ptrFile) != sizeof(char) * 3)
             return ERROR;
 
         *utf8Char = (*utf8Char << 24) | (buffer[0] << 16) | (buffer[1] << 8) | buffer[0];
