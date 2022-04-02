@@ -1,0 +1,13 @@
+Shared region:
+
+file names
+number of files
+fileIdx
+totalWordsEndingInConsoant
+totalWordsBeginningInVowel
+totalWords
+
+Main:
+Stora file names
+create workers
+wait for workers

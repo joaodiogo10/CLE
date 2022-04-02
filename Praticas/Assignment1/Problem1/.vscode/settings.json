@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.txt": "plaintext",
+        "probconst.h": "c",
+        "sharedmemory.h": "c",
+        "string.h": "c"
+    }
+}
