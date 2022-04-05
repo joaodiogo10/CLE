@@ -1,0 +1,72 @@
+\hypertarget{fifo_8h}{}\doxysection{/home/joao/\+Desktop/\+CLE/\+Praticas/producers\+Consumers\+Example/producers\+Consumers/source/fifo.h File Reference}
+\label{fifo_8h}\index{/home/joao/Desktop/CLE/Praticas/producersConsumersExample/producersConsumers/source/fifo.h@{/home/joao/Desktop/CLE/Praticas/producersConsumersExample/producersConsumers/source/fifo.h}}
+
+
+Problem name\+: Producers / Consumers.  
+
+
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{fifo_8h_acf62b959d24fb0fd3eefad3d439529ff}{put\+Val}} (unsigned int prod\+Id, unsigned int val)
+\begin{DoxyCompactList}\small\item\em Store a value in the data transfer region. \end{DoxyCompactList}\item 
+unsigned int \mbox{\hyperlink{fifo_8h_ad3c8df257d0076db8efa36259d9e35ec}{get\+Val}} (unsigned int cons\+Id)
+\begin{DoxyCompactList}\small\item\em Get a value from the data transfer region. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Problem name\+: Producers / Consumers. 
+
+(interface file)
+
+Synchronization based on monitors. Both threads and the monitor are implemented using the pthread library which enables the creation of a monitor of the Lampson / Redell type.
+
+Data transfer region implemented as a monitor.
+
+Definition of the operations carried out by the producers / consumers\+: \begin{DoxyItemize}
+\item put\+Val \item get\+Val.\end{DoxyItemize}
+\begin{DoxyAuthor}{Author}
+António Rui Borges -\/ March 2019 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{fifo_8h_ad3c8df257d0076db8efa36259d9e35ec}\label{fifo_8h_ad3c8df257d0076db8efa36259d9e35ec}} 
+\index{fifo.h@{fifo.h}!getVal@{getVal}}
+\index{getVal@{getVal}!fifo.h@{fifo.h}}
+\doxysubsubsection{\texorpdfstring{getVal()}{getVal()}}
+{\footnotesize\ttfamily unsigned int get\+Val (\begin{DoxyParamCaption}\item[{unsigned int}]{cons\+Id }\end{DoxyParamCaption})}
+
+
+
+Get a value from the data transfer region. 
+
+Operation carried out by the consumers.
+
+
+\begin{DoxyParams}{Parameters}
+{\em cons\+Id} & consumer identification\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+value 
+\end{DoxyReturn}
+\mbox{\Hypertarget{fifo_8h_acf62b959d24fb0fd3eefad3d439529ff}\label{fifo_8h_acf62b959d24fb0fd3eefad3d439529ff}} 
+\index{fifo.h@{fifo.h}!putVal@{putVal}}
+\index{putVal@{putVal}!fifo.h@{fifo.h}}
+\doxysubsubsection{\texorpdfstring{putVal()}{putVal()}}
+{\footnotesize\ttfamily void put\+Val (\begin{DoxyParamCaption}\item[{unsigned int}]{prod\+Id,  }\item[{unsigned int}]{val }\end{DoxyParamCaption})}
+
+
+
+Store a value in the data transfer region. 
+
+Operation carried out by the producers.
+
+
+\begin{DoxyParams}{Parameters}
+{\em prod\+Id} & producer identification \\
+\hline
+{\em val} & value to be stored \\
+\hline
+\end{DoxyParams}

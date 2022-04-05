@@ -1,0 +1,58 @@
+\hypertarget{producersConsumers_8c}{}\doxysection{/home/joao/\+Desktop/\+CLE/\+Praticas/producers\+Consumers\+Example/producers\+Consumers/source/producers\+Consumers.c File Reference}
+\label{producersConsumers_8c}\index{/home/joao/Desktop/CLE/Praticas/producersConsumersExample/producersConsumers/source/producersConsumers.c@{/home/joao/Desktop/CLE/Praticas/producersConsumersExample/producersConsumers/source/producersConsumers.c}}
+
+
+Problem name\+: Producers / Consumers.  
+
+
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$pthread.\+h$>$}\newline
+{\ttfamily \#include $<$math.\+h$>$}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}prob\+Const.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}fifo.\+h\char`\"{}}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{producersConsumers_8c_a840291bc02cba5474a4cb46a9b9566fe}{main}} (void)
+\begin{DoxyCompactList}\small\item\em Main thread. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{producersConsumers_8c_ab99931d20c6ee0022583f9e187294fc3}\label{producersConsumers_8c_ab99931d20c6ee0022583f9e187294fc3}} 
+int {\bfseries status\+Prod} \mbox{[}\mbox{\hyperlink{probConst_8h_a0240ac851181b84ac374872dc5434ee4}{N}}\mbox{]}
+\begin{DoxyCompactList}\small\item\em producer threads return status array \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{producersConsumers_8c_a26318bb6aca9a06bab51cb3f6bde8067}\label{producersConsumers_8c_a26318bb6aca9a06bab51cb3f6bde8067}} 
+int {\bfseries status\+Cons} \mbox{[}\mbox{\hyperlink{probConst_8h_a0240ac851181b84ac374872dc5434ee4}{N}}\mbox{]}
+\begin{DoxyCompactList}\small\item\em consumer threads return status array \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Problem name\+: Producers / Consumers. 
+
+(implementation file)
+
+Synchronization based on monitors. Both threads and the monitor are implemented using the pthread library which enables the creation of a monitor of the Lampson / Redell type.
+
+Generator thread of the intervening entities.
+
+\begin{DoxyAuthor}{Author}
+António Rui Borges -\/ March 2019 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{producersConsumers_8c_a840291bc02cba5474a4cb46a9b9566fe}\label{producersConsumers_8c_a840291bc02cba5474a4cb46a9b9566fe}} 
+\index{producersConsumers.c@{producersConsumers.c}!main@{main}}
+\index{main@{main}!producersConsumers.c@{producersConsumers.c}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Main thread. 
+
+Its role is starting the simulation by generating the intervening entities threads (producers and consumers) and waiting for their termination. 

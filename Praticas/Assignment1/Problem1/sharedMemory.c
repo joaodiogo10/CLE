@@ -11,15 +11,6 @@ static unsigned int fileIdx;
 /** \brief total number of files */
 static unsigned int numberOfFiles;
 
-/** \brief name of the files to process */
-static char **fileNames;
-
-static unsigned int totalWordsEndingInConsoant;
-
-static unsigned int totalWordsBeginningInVowel;
-
-static unsigned int totalWords;
-
 struct sFileHandler
 {
     unsigned int totalWordsEndingInConsoant;
@@ -27,9 +18,8 @@ struct sFileHandler
     unsigned int totalWords;
     char *fileName;
 };
-typedef struct sFileHandler FileHandler;
 
-static FileHandler *handlers;
+static FileHandler handlers;
 
 /** \brief flag to check if sharedMemory is initialized */
 static bool initialized = false;
@@ -40,7 +30,7 @@ static pthread_mutex_t accessCR = PTHREAD_MUTEX_INITIALIZER;
 /** \brief worker threads return status array */
 int statusWorkers[N];
 
-int sm_initialize( int nFiles, char files[nFiles][MAX_FILE_PATH_SIZE])
+int sm_initialize( int nFiles, char files[nFiles][MAX_FILE_NAME_SIZE])
 {
     if (initialized)
     {
@@ -50,25 +40,17 @@ int sm_initialize( int nFiles, char files[nFiles][MAX_FILE_PATH_SIZE])
 
     // verify file path size
     for (int i = 0; i < numberOfFiles; i++)
-        if (strlen(fileNames[i]) > MAX_FILE_PATH_SIZE)
+        if (strlen(files[i]) > MAX_FILE_NAME_SIZE)
         {
-            fprintf(stderr, "Error initializing file path excess MAX_FILE_PATH_SIZE");
+            fprintf(stderr, "Error initializing file path excess MAX_FILE_NAME_SIZE");
             return FAILURE;
         }
 
-    totalWordsEndingInConsoant = totalWordsBeginningInVowel = totalWords = 0;
     numberOfFiles = nFiles;
     fileIdx = 0;
 
-    handlers = (FileHandler *) malloc(nFiles * sizeof(FileHandler));
+    handlers = (FileHandler) malloc(nFiles * sizeof(struct sFileHandler));
     if (handlers == NULL)
-    {
-        perror("Malloc error");
-        return FAILURE;
-    }
-    
-    fileNames =  (char **) calloc(nFiles, sizeof(char *));
-    if (fileNames == NULL)
     {
         perror("Malloc error");
         return FAILURE;
@@ -76,20 +58,11 @@ int sm_initialize( int nFiles, char files[nFiles][MAX_FILE_PATH_SIZE])
 
     for (int i = 0; i < numberOfFiles; i++)
     {
-        fileNames[i] = (char *) calloc(MAX_FILE_PATH_SIZE, sizeof(char));
-        if (fileNames[i] == NULL) // dealocate memory?
-        {
-            perror("Malloc error");
-            return FAILURE;
-        }
-
-        handlers[i].fileName = (char *) calloc(MAX_FILE_PATH_SIZE, sizeof(char));
-        
+        handlers[i].fileName = (char *) calloc(MAX_FILE_NAME_SIZE, sizeof(char));
         handlers[i].totalWords = 0;
         handlers[i].totalWordsBeginningInVowel = 0;
         handlers[i].totalWordsEndingInConsoant = 0;
 
-        strcpy(fileNames[i], files[i]);
         strcpy(handlers[i].fileName , files[i]);
     }
     initialized = true;
@@ -105,17 +78,19 @@ int sm_close()
         return FAILURE;
     }
 
-    for (int i = 0; i < numberOfFiles; i++)
-    {
-        free((void *) fileNames[i]);
-    }
-
-    free(fileNames);
-
     return SUCCESS;
 }
 
-bool sm_getFileToProcess(int id, char *fileName)
+int sm_getFileName(FileHandler fileHandler, char* fileName) 
+{
+    if(fileHandler == NULL)
+        return FAILURE;
+        
+    strcpy(fileName, fileHandler->fileName);
+    return SUCCESS;
+}
+
+bool sm_getFileToProcess(int id, FileHandler *fileHandler)
 {
     bool moreWork = false;
     if (pthread_mutex_lock(&accessCR) != 0)
@@ -127,7 +102,7 @@ bool sm_getFileToProcess(int id, char *fileName)
     }
     if (fileIdx < numberOfFiles)
     {
-        strcpy(fileName, fileNames[fileIdx]);
+        *fileHandler = &handlers[fileIdx];
         fileIdx++;
         moreWork = true;
     }
@@ -138,11 +113,10 @@ bool sm_getFileToProcess(int id, char *fileName)
         statusWorkers[id] = EXIT_FAILURE;
         pthread_exit(&statusWorkers[id]);
     }
-
     return moreWork;
 }
 
-void sm_addTotalWordsEndingInConsoant(int id, unsigned int numberWords)
+void sm_addTotalWordsEndingInConsoant(int id, unsigned int numberWords, FileHandler fileHandler)
 {
     if (pthread_mutex_lock(&accessCR) != 0)
     {
@@ -150,7 +124,7 @@ void sm_addTotalWordsEndingInConsoant(int id, unsigned int numberWords)
         statusWorkers[id] = EXIT_FAILURE;
         pthread_exit(&statusWorkers[id]);
     }
-    totalWordsEndingInConsoant += numberWords;
+    fileHandler->totalWordsEndingInConsoant += numberWords;
 
     if (pthread_mutex_unlock(&accessCR) != 0)
     {
@@ -160,7 +134,7 @@ void sm_addTotalWordsEndingInConsoant(int id, unsigned int numberWords)
     }
 }
 
-void sm_addTotalWordsBeginningInVowel(int id, unsigned int numberWords)
+void sm_addTotalWordsBeginningInVowel(int id, unsigned int numberWords, FileHandler fileHandler)
 {
     if (pthread_mutex_lock(&accessCR) != 0)
     {
@@ -168,7 +142,7 @@ void sm_addTotalWordsBeginningInVowel(int id, unsigned int numberWords)
         statusWorkers[id] = EXIT_FAILURE;
         pthread_exit(&statusWorkers[id]);
     }
-    totalWordsBeginningInVowel += numberWords;
+    fileHandler->totalWordsBeginningInVowel += numberWords;
     if (pthread_mutex_unlock(&accessCR) != 0)
     {
         perror("error on exiting monitor");
@@ -177,7 +151,7 @@ void sm_addTotalWordsBeginningInVowel(int id, unsigned int numberWords)
     }
 }
 
-void sm_addTotalWords(int id, unsigned int numberWords)
+void sm_addTotalWords(int id, unsigned int numberWords, FileHandler fileHandler)
 {
     if (pthread_mutex_lock(&accessCR) != 0)
     {
@@ -185,7 +159,8 @@ void sm_addTotalWords(int id, unsigned int numberWords)
         statusWorkers[id] = EXIT_FAILURE;
         pthread_exit(&statusWorkers[id]);
     }
-    totalWords += numberWords;
+    fileHandler->totalWords += numberWords;
+
     if (pthread_mutex_unlock(&accessCR) != 0)
     {
         perror("error on exiting monitor");
@@ -197,7 +172,10 @@ void sm_addTotalWords(int id, unsigned int numberWords)
 void sm_getResults(unsigned int *wordsEndingInConsoant, unsigned int *wordsBeginningInVowel,
                    unsigned int *words)
 {
-    *wordsEndingInConsoant = totalWordsEndingInConsoant;
-    *wordsBeginningInVowel = totalWordsBeginningInVowel;
-    *words = totalWords;
+    static int tmp = 0;
+
+    *wordsEndingInConsoant = handlers[tmp].totalWordsEndingInConsoant;
+    *wordsBeginningInVowel = handlers[tmp].totalWordsBeginningInVowel;
+    *words = handlers[tmp].totalWords;
+    tmp++;
 }

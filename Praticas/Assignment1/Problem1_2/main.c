@@ -1,34 +1,17 @@
 #include <stdio.h>
-#include <stdbool.h>
-#include <time.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <errno.h>
+#include <stdbool.h>
 #include <string.h>
-#include "probConst.h"
 #include "sharedMemory.h"
-#include "asciiConst.h"
-
-enum CharacterType
-{
-    CONSOANT,
-    UNDERSCORE,
-    VOWEL,
-    DIGIT,
-    APOSTROPHE,
-    DELIMITER,
-    EOFILE,
-    NOT_DEFINED,
-    ERROR
-};
-
-/** \brief read UTF8 value and returns CharacterType */
-enum CharacterType readUTF8Char(FILE *ptrFile, unsigned int *utf8Char);
-
-void printResults(char *fileName, unsigned int totalWords, unsigned int totalWordsBeginningInVowel, unsigned int totalWordsEndingInConsoant);
+#include "utf8.h"
+#include "probConst.h"
 
 /** \brief worker life cycle routine */
 static void * work(void *args);
+
+/** \brief print results */
+void printResults(Results *results, unsigned int numberFiles);
 
 /** \brief worker threads return status array */
 int statusWorkers[N];
@@ -49,7 +32,7 @@ int main(int argc, char *argv[])
     {
         strcpy(fileNames[i], argv[i+1]);
     }
-    if(sm_initialize(nFiles, fileNames) == FAILURE)
+    if(sm_registerFiles(nFiles, fileNames) == FAILURE)
     {
         fprintf(stderr, "Fail to initialize shared memory");
         exit(EXIT_FAILURE);
@@ -90,27 +73,26 @@ int main(int argc, char *argv[])
     elapsedTime += endTime - startTime;
     printf("\nElapsed time = %.6f s\n", elapsedTime);
 
-    unsigned int totalWordsEndingInConsoant;
-    unsigned int totalWordsBeginningInVowel;
-    unsigned int totalWords;
+    struct sResults results[nFiles];
+    sm_getResults(results);
+    printResults(results, nFiles);
 
-    for(int i = 0; i < nFiles; i++) 
-    {
-        sm_getResults(&totalWordsEndingInConsoant, &totalWordsBeginningInVowel, &totalWords);
-        printResults(fileNames[0], totalWords, totalWordsBeginningInVowel, totalWordsEndingInConsoant);
-    }
     sm_close();
     exit(EXIT_SUCCESS);
 }
 
-void printResults(char *fileName, unsigned int totalWords, unsigned int totalWordsBeginningInVowel, unsigned int totalWordsEndingInConsoant)
+void printResults(Results *results, unsigned int numberFiles)
 {
-    fprintf(stdout,
-            "\nFile name: %s\n"
-            "Total number of words = %d\n"
-            "N. of words beginning with a vowel = %d\n"
-            "N. of words ending with a consonant = %d\n",
-            fileName, totalWords, totalWordsBeginningInVowel, totalWordsEndingInConsoant);
+    for(int i = 0; i < numberFiles; i++)
+    {
+        fprintf(stdout,
+        "\nFile name: %s\n"
+        "Total number of words = %d\n"
+        "N. of words beginning with a vowel = %d\n"
+        "N. of words ending with a consonant = %d\n",
+        results[i].fileName, results[i].count.words, results[i].count.wordsBeginningInVowel, results[i].count.wordsEndingInConsoant);
+    }
+    
 }
 
 static void * work(void * args)
@@ -118,26 +100,13 @@ static void * work(void * args)
     while(true)
     {
         int id = *((int *) args);
-        FileHandler fileHandler = NULL;
+        unsigned char data[DATA_BUFFER_SIZE];
+        unsigned int size;
+        FileHandler fileHandler;
+        bool workToDo = sm_getChunkOfData(id, data, &size, &fileHandler);
 
-        bool workToDo = sm_getFileToProcess(id, &fileHandler);
-        
-        //end work life cycle if there is no more work to do
-        if(!workToDo)
+        if(!workToDo) //end work life cycle if there is no more work to do
         {
-            statusWorkers[id] = EXIT_SUCCESS;
-            pthread_exit(&statusWorkers[id]);
-        }
-
-        char fileName[MAX_FILE_NAME_SIZE];
-        sm_getFileName(fileHandler, fileName);
-        
-        FILE *ptrFile;
-        ptrFile = fopen(fileName, "rb");
-
-        if (ptrFile == NULL)
-        {
-            fprintf(stderr, "Error opening file \"%s\"!\n", fileName);
             statusWorkers[id] = EXIT_SUCCESS;
             pthread_exit(&statusWorkers[id]);
         }
@@ -145,15 +114,27 @@ static void * work(void * args)
         unsigned int totalWords = 0;
         unsigned int totalWordsEndingInConsoant = 0;
         unsigned int totalWordsBeginningInVowel = 0;
-        unsigned int utf8Char;
         enum CharacterType charType;
         enum CharacterType lastCharType;
         bool inWord = false;
 
+
+        unsigned int utf8Char;
+        int utf8CharSize;
+        int dataIdx = 0;
         // Block of text
         do
         {
-            charType = readUTF8Char(ptrFile, &utf8Char);
+            utf8Char = data[dataIdx];
+            utf8CharSize = getUTF8CharSize(data[dataIdx]);
+            
+            for(int i = 1; i < utf8CharSize; i++)
+            {
+                utf8Char = (utf8Char << 8) | data[dataIdx + i];
+            }
+            dataIdx += utf8CharSize;
+            charType = getUTF8CharType(utf8Char);
+
             switch (inWord)
             {
             case false:
@@ -201,17 +182,29 @@ static void * work(void * args)
                 }
                 break;
             }
-
+            /*if(charType == VOWEL)
+                printf("VOWEL\n");
+            if(charType == CONSOANT)
+                printf("CONSOANT\n");
+            if(charType == UNDERSCORE)
+                printf("UNDERSCORE\n");
+            if(charType == DIGIT)
+                printf("DIGIT\n");
+            if(charType == DELIMITER)
+                printf("DELIMITER\n");
+            if(charType == ERROR)
+                printf("ERROR\n");         
+            printf("%x\n", utf8Char); */
             if (charType != NOT_DEFINED && charType != ERROR) // ignore case NOT_DEFINED or ERROR
-                lastCharType = charType;
+                lastCharType = charType; 
 
-        } while (charType != EOFILE);
+        } while (dataIdx < size);
 
-
-        sm_addTotalWords(id, totalWords, fileHandler);
-        sm_addTotalWordsBeginningInVowel(id, totalWordsBeginningInVowel, fileHandler);
-        sm_addTotalWordsEndingInConsoant(id, totalWordsEndingInConsoant, fileHandler);
-        fclose(ptrFile);
+        Count count;
+        count.words = totalWords;
+        count.wordsBeginningInVowel = totalWordsBeginningInVowel;
+        count.wordsEndingInConsoant = totalWordsEndingInConsoant;
+        
+        sm_registerResult(id, fileHandler, &count);
     }
-
 }

@@ -1,0 +1,1 @@
+gcc main.c sharedMemory.c utf8.c -lpthread -Wall -O3 -o countWords

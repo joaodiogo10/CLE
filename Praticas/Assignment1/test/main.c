@@ -67,7 +67,9 @@ enum CharacterType
     ERROR
 };
 
-enum CharacterType readUTF8Char(FILE *ptrFile, unsigned int *utf8Char);
+int readUTF8Char(FILE *ptrFile, unsigned int *utf8Char);
+
+enum CharacterType getUTF8CharType(unsigned int utf8Char);
 
 int main(int argc, char *argv[])
 {
@@ -102,10 +104,13 @@ int main(int argc, char *argv[])
         
         startTime = ( (double) clock()) / CLOCKS_PER_SEC;
         
+        int end;
         //Process file
         do
         {
-            charType = readUTF8Char(ptrFile, &utf8Char);
+            end = readUTF8Char(ptrFile, &utf8Char);
+            charType = getUTF8CharType(utf8Char);
+
             switch (inWord)
             {
             case false:
@@ -165,7 +170,7 @@ int main(int argc, char *argv[])
             if(charType != NOT_DEFINED && charType != ERROR) //ignore case NOT_DEFINED or ERROR
                 lastCharType = charType; 
 
-        } while(charType != EOFILE);
+        } while(end != 0);
 
         endTime = ( (double) clock()) / CLOCKS_PER_SEC;
         elapsedTime += endTime - startTime;
@@ -184,16 +189,16 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-enum CharacterType readUTF8Char(FILE *ptrFile, unsigned int *utf8Char)
+int readUTF8Char(FILE *ptrFile, unsigned int *utf8Char)
 {
     unsigned char buffer[3];
-    if(fread(&buffer, sizeof(char), 1, ptrFile) != sizeof(char))
+    if (fread(&buffer, sizeof(char), 1, ptrFile) != sizeof(char))
     {
         if (ferror(ptrFile) != 0)
-            return ERROR;
+            return 0;
 
         if (feof(ptrFile) != 0)
-            return EOFILE;
+            return 0;
     }
 
     unsigned char tmp = buffer[0] & 0xF8;
@@ -201,73 +206,77 @@ enum CharacterType readUTF8Char(FILE *ptrFile, unsigned int *utf8Char)
 
     if (tmp >> 7 == 0) // 1 byte character
     {
-        // do nothing
+        return 1;
     }
     else if (tmp >> 5 == 0b110) // 2 bytes character
     {
-        if(fread(&buffer, sizeof(char), 1, ptrFile) != sizeof(char))
-            return ERROR;
+        if (fread(&buffer, sizeof(char), 1, ptrFile) != sizeof(char))
+            return 0;
 
         *utf8Char = (*utf8Char << 8) | buffer[0];
+        return 2;
     }
     else if (tmp >> 4 == 0b1110) // 3 bytes character
     {
-        if(fread(&buffer, sizeof(char), 2, ptrFile) != sizeof(char) * 2)
-            return ERROR;
+        if (fread(&buffer, sizeof(char), 2, ptrFile) != sizeof(char) * 2)
+            return 0;
 
         *utf8Char = (*utf8Char << 16) | (buffer[0] << 8) | buffer[1];
+
+        return 3;
     }
     else if (tmp >> 3 == 0b1110) // 4 bytes character
     {
-        if(fread(&buffer, sizeof(char), 3, ptrFile) != sizeof(char) * 3)
-            return ERROR;
+        if (fread(&buffer, sizeof(char), 3, ptrFile) != sizeof(char) * 3)
+            return 0;
 
         *utf8Char = (*utf8Char << 24) | (buffer[0] << 16) | (buffer[1] << 8) | buffer[0];
+        return 4;
     }
     // invalid
-    else
-    {
-        return ERROR;
-    }
+    return 0;
+}
 
+enum CharacterType getUTF8CharType(unsigned int utf8Char)
+{
     // Check if is a delimiter
     for (int i = 0; i < sizeof(delimiters) / sizeof(*delimiters); i++)
     {
-        if (delimiters[i] == *utf8Char)
+        if (delimiters[i] == utf8Char)
             return DELIMITER;
     }
 
-    //check if is a apostrophe
-    if(*utf8Char == apostrophe)
+    // check if is a apostrophe
+    if (utf8Char == apostrophe)
         return APOSTROPHE;
 
     // Check if is a vowel
     for (int i = 0; i < sizeof(vowels) / sizeof(*vowels); i++)
     {
-        if (vowels[i] == *utf8Char)
+        if (vowels[i] == utf8Char)
             return VOWEL;
     }
 
     // Check if is a consoant
     for (int i = 0; i < sizeof(specialConsoants) / sizeof(*specialConsoants); i++)
     {
-        if (specialConsoants[i] == *utf8Char)
+        if (specialConsoants[i] == utf8Char)
         {
             return CONSOANT;
         }
     }
-    if ((ASCII_LAST_LOWER_CASE_LETTER >= *utf8Char && *utf8Char >= ASCII_FIRST_LOWER_CASE_LETTER) ||
-        (ASCII_LAST_UPPER_CASE_LETTER >= *utf8Char && *utf8Char >= ASCII_FIRST_UPPER_CASE_LETTER))
+    if ((ASCII_LAST_LOWER_CASE_LETTER >= utf8Char && utf8Char >= ASCII_FIRST_LOWER_CASE_LETTER) ||
+        (ASCII_LAST_UPPER_CASE_LETTER >= utf8Char && utf8Char >= ASCII_FIRST_UPPER_CASE_LETTER))
     {
         return CONSOANT;
     }
 
     // Check if is a digit
-    if(*utf8Char >= 0x30 && *utf8Char <=0x39)
+    if (utf8Char >= 0x30 && utf8Char <= 0x39)
         return DIGIT;
-    
+
     // Check if is an underscore
-    if (*utf8Char == underscore)
+    if (utf8Char == underscore)
     {
         return UNDERSCORE;
     }

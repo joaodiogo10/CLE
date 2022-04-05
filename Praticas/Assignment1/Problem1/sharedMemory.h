@@ -5,15 +5,20 @@
 #define SUCCESS 1
 #define FAILURE 0
 
-int sm_initialize(int nFiles, char files[nFiles][MAX_FILE_PATH_SIZE]);
+struct sFileHandler;
+typedef struct sFileHandler* FileHandler;
 
-bool sm_getFileToProcess(int id, char *fileName);
+int sm_initialize(int nFiles, char files[nFiles][MAX_FILE_NAME_SIZE]);
 
-void sm_addTotalWordsEndingInConsoant(int id, unsigned int numberWords);
+bool sm_getFileToProcess(int id, FileHandler *fileHandler);
 
-void sm_addTotalWordsBeginningInVowel(int id, unsigned int numberWords);
+int sm_getFileName(FileHandler fileHandler, char fileName[MAX_FILE_NAME_SIZE]);
 
-void sm_addTotalWords(int id, unsigned int numberWords);
+void sm_addTotalWordsEndingInConsoant(int id, unsigned int numberWords, FileHandler fileHandler);
+
+void sm_addTotalWordsBeginningInVowel(int id, unsigned int numberWords, FileHandler fileHandler);
+
+void sm_addTotalWords(int id, unsigned int numberWords, FileHandler fileHandler);
 
 void sm_getResults(unsigned int *wordsEndingInConsoant, unsigned int *wordsBeginningInVowel,
                    unsigned int *words);

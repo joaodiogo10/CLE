@@ -1,0 +1,1 @@
+gcc -Wall -O3 -o producersConsumers producersConsumers.c fifo.c -lpthread -lm
