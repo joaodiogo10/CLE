@@ -1,0 +1,1 @@
+errno perror printf(stderr)

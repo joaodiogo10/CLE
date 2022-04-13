@@ -69,7 +69,6 @@ int sm_registerFiles(int nFiles, char files[nFiles][MAX_FILE_NAME_SIZE])
         //Open file stream
         FILE *ptrFile;
         ptrFile = fopen(handlers[i].fileName , "rb");
-
         if (ptrFile == NULL)
         {
             perror("fopen error");
@@ -91,9 +90,13 @@ int sm_close()
         fprintf(stderr, "Error shared memory not initialized");
         return FAILURE;
     }
+    for(int i = 0; i < numberOfFiles; i++)
+    {
+        free(handlers[i].fileName);
+        fclose(handlers[i].ptrFile);
+    }
+    free(handlers);
 
-
-    //TODO: free memory
     return SUCCESS;
 }
 

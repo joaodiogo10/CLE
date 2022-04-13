@@ -6,8 +6,6 @@
 #define SUCCESS 1
 #define FAILURE 0
 
-#define DATA_BUFFER_SIZE 4096
-
 struct sFileHandler;
 typedef struct sFileHandler *FileHandler;
 
