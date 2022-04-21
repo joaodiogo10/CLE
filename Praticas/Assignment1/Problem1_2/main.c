@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "USAGE: ./countWords fileName [fileName ...]\n");
         return 1;
     }
+    
     //Save file names and count in shared memory
     int nFiles = argc-1;
     char fileNames[nFiles][MAX_FILE_NAME_SIZE];
@@ -45,9 +46,10 @@ int main(int argc, char *argv[])
     for (int i = 0; i < N; i++)
         workersID[i] = i;
 
-
     double startTime = 0, endTime = 0, elapsedTime = 0;
-    startTime = ((double)clock()) / CLOCKS_PER_SEC;
+    struct timespec time;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &time);
+    startTime = time.tv_nsec * 1e-9L;
 
     for (int i = 0; i < N; i++)
         if (pthread_create(&workers[i], NULL, work, (void *) &workersID[i]) != 0) /* thread producer */
@@ -69,8 +71,10 @@ int main(int argc, char *argv[])
         printf("its status was %d\n", *executionStatus);
     }
 
-    endTime = ((double)clock()) / CLOCKS_PER_SEC;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &time);
+    endTime = time.tv_nsec * 1e-9L;
     elapsedTime += endTime - startTime;
+    
     printf("\nElapsed time = %.6f s\n", elapsedTime);
 
     struct sResults results[nFiles];

@@ -106,7 +106,6 @@ bool sm_getChunkOfData(int id, unsigned char data[DATA_BUFFER_SIZE], unsigned in
     bool moreWorkToDo = true;
     if (pthread_mutex_lock(&accessCR) != 0)
     {
-        // errno = statusWorkers[id]; save error in errno ???
         perror("error on entering monitor");
         statusWorkers[id] = EXIT_FAILURE;
         pthread_exit(&statusWorkers[id]);
@@ -178,7 +177,6 @@ void sm_registerResult(int id, FileHandler fileHandler, Count *count)
 {
     if (pthread_mutex_lock(&accessCR) != 0)
     {
-        // errno = statusWorkers[id]; /* save error in errno ???*/
         perror("error on entering monitor");
         statusWorkers[id] = EXIT_FAILURE;
         pthread_exit(&statusWorkers[id]);
@@ -188,7 +186,6 @@ void sm_registerResult(int id, FileHandler fileHandler, Count *count)
     fileHandler->count.wordsEndingInConsoant += count->wordsEndingInConsoant;
     if (pthread_mutex_unlock(&accessCR) != 0)
     {
-        // errno = statusWorkers[id]; /* save error in errno ???*/
         perror("error on exiting monitor");
         statusWorkers[id] = EXIT_FAILURE;
         pthread_exit(&statusWorkers[id]);

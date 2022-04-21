@@ -1,7 +1,7 @@
 #ifndef PROB_CONST_H_
 #define PROB_CONST_H_
 
-#define N   2  //number of workers
+#define N   4 //number of workers
 
 #define MAX_FILE_NAME_SIZE 50       //maximum size of file path
 
