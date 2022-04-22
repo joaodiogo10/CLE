@@ -1,0 +1,42 @@
+\hypertarget{sharedMemory_8h_source}{}\doxysection{/home/joao/\+Desktop/\+CLE/\+Praticas/\+Assignment1/\+Problem1\+\_\+2/shared\+Memory.h}
+\mbox{\hyperlink{sharedMemory_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#ifndef SHARED\_MEMORY\_H}}
+\DoxyCodeLine{2 \textcolor{preprocessor}{\#define SHARED\_MEMORY\_H}}
+\DoxyCodeLine{3 }
+\DoxyCodeLine{4 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{probConst_8h}{probConst.h}}"{}}}
+\DoxyCodeLine{5 }
+\DoxyCodeLine{26 \textcolor{preprocessor}{\#define SUCCESS 1}}
+\DoxyCodeLine{27 }
+\DoxyCodeLine{29 \textcolor{preprocessor}{\#define FAILURE 0}}
+\DoxyCodeLine{30 }
+\DoxyCodeLine{32 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\mbox{\hyperlink{structsFileHandler}{sFileHandler}} *\mbox{\hyperlink{sharedMemory_8h_ad4ae10927963f41e761481f4044ff509}{FileHandler}};}
+\DoxyCodeLine{33 }
+\DoxyCodeLine{35 \textcolor{keyword}{struct }\mbox{\hyperlink{structsCount}{sCount}}}
+\DoxyCodeLine{36 \{}
+\DoxyCodeLine{37     \textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{int} \mbox{\hyperlink{structsCount_ad16376055db3b46e79d2aea15fba5505}{wordsEndingInConsoant}};     }
+\DoxyCodeLine{38     \textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{int} \mbox{\hyperlink{structsCount_aa139b86f51149425adf29a56018cb9c6}{wordsBeginningInVowel}};     }
+\DoxyCodeLine{39     \textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{int} \mbox{\hyperlink{structsCount_a3593b0ef9e603cebc0e8e790064ac569}{words}};                     }
+\DoxyCodeLine{40 \};  }
+\DoxyCodeLine{41 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\mbox{\hyperlink{structsCount}{sCount}} \mbox{\hyperlink{structsCount}{Count}};}
+\DoxyCodeLine{42 }
+\DoxyCodeLine{44 \textcolor{keyword}{struct }\mbox{\hyperlink{structsResults}{sResults}}}
+\DoxyCodeLine{45 \{}
+\DoxyCodeLine{46     \textcolor{keywordtype}{char} \mbox{\hyperlink{structsResults_a2f431baa17d65609a36cdd0fda8b372b}{fileName}}[\mbox{\hyperlink{probConst_8h_a0887cab1acf8e238e6777ab604ed7044}{MAX\_FILE\_NAME\_SIZE}}];      }
+\DoxyCodeLine{47     \mbox{\hyperlink{structsCount}{Count}} \mbox{\hyperlink{structsResults_ad5fcfcbf9caa8a3d54e6ebc3710a735e}{count}};                            }
+\DoxyCodeLine{48 \};}
+\DoxyCodeLine{49 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\mbox{\hyperlink{structsResults}{sResults}} \mbox{\hyperlink{structsResults}{Results}};}
+\DoxyCodeLine{50 }
+\DoxyCodeLine{65 \textcolor{keywordtype}{int} \mbox{\hyperlink{sharedMemory_8h_a103b9141e423a416c3cefaf7dc55bccd}{sm\_initialize}}(\textcolor{keywordtype}{int} nFiles, \textcolor{keywordtype}{char} files[nFiles][\mbox{\hyperlink{probConst_8h_a0887cab1acf8e238e6777ab604ed7044}{MAX\_FILE\_NAME\_SIZE}}]);}
+\DoxyCodeLine{66 }
+\DoxyCodeLine{83 \textcolor{keywordtype}{bool} \mbox{\hyperlink{sharedMemory_8h_a9d9277eb29321a610be9bb461969fb2a}{sm\_getChunkOfData}}(\textcolor{keywordtype}{int} \textcolor{keywordtype}{id}, \textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{char} data[\mbox{\hyperlink{probConst_8h_ab723c5f0e9759c70ed582dfd77431ff7}{DATA\_BUFFER\_SIZE}}], \textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{int} *size, \mbox{\hyperlink{structsFileHandler}{FileHandler}} *fileHandler);}
+\DoxyCodeLine{84 }
+\DoxyCodeLine{94 \textcolor{keywordtype}{void} \mbox{\hyperlink{sharedMemory_8h_a989f3f908ac0b478b552d5a7056eabce}{sm\_registerResult}}(\textcolor{keywordtype}{int} \textcolor{keywordtype}{id}, \mbox{\hyperlink{structsFileHandler}{FileHandler}} fileHandler, \mbox{\hyperlink{structsCount}{Count}} *\mbox{\hyperlink{structsResults_ad5fcfcbf9caa8a3d54e6ebc3710a735e}{count}});}
+\DoxyCodeLine{95 }
+\DoxyCodeLine{102 \textcolor{keywordtype}{void} \mbox{\hyperlink{sharedMemory_8h_a6db9192ad4993c3c2225f4a7f7fd6d8c}{sm\_getResults}}(\mbox{\hyperlink{structsResults}{Results}} *results);}
+\DoxyCodeLine{103 }
+\DoxyCodeLine{113 \textcolor{keywordtype}{int} \mbox{\hyperlink{sharedMemory_8h_acdba6eb2310386605ffaa530cd051dde}{sm\_close}}();}
+\DoxyCodeLine{114 }
+\DoxyCodeLine{115 \textcolor{preprocessor}{\#endif }\textcolor{comment}{/* SHARED\_MEMORY\_H */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

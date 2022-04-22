@@ -7,18 +7,41 @@
 #include "utf8.h"
 #include "probConst.h"
 
-/** \brief worker life cycle routine */
+/**
+ *  \file countWords.c
+ *
+ *  \brief Text processing in Portuguese program  
+ *
+ *  This program reads in succession several text files text#.txt whose names are provided in
+ *  the command line and prints a listing of total number of words, number of words beginning with a
+ *  vowel and number of words ending with a consonant for each of the supplied files.
+ *  
+ *  To carry out this task 1 or more concurrent worker threads are launched.  
+ * 
+ *  \author João Diogo Ferreira, João Tiago Rainho - April 2022
+ */
+
+
+/** \brief Worker life cycle routine. */
 static void * work(void *args);
 
-/** \brief print results */
-void printResults(Results *results, unsigned int numberFiles);
+
+/** \brief Print results. */
+void printResults(const Results results);
+
 
 /** \brief worker threads return status array */
 int statusWorkers[N];
 
+/** \brief Main thread.
+ *  
+ *  The role of main thread is to get the data file names by processing the command line and storing them
+ *  in the shared region, creating the worker threads and waiting for their termination, and printing the results
+ *  o the processing.
+*/
 int main(int argc, char *argv[])
 {
-    //Parse args
+    //Parse file names
     if (argc == 1)
     {
         fprintf(stderr, "USAGE: ./countWords fileName [fileName ...]\n");
@@ -33,7 +56,7 @@ int main(int argc, char *argv[])
     {
         strcpy(fileNames[i], argv[i+1]);
     }
-    if(sm_registerFiles(nFiles, fileNames) == FAILURE)
+    if(sm_initialize(nFiles, fileNames) == FAILURE)
     {
         fprintf(stderr, "Fail to initialize shared memory");
         exit(EXIT_FAILURE);
@@ -46,10 +69,10 @@ int main(int argc, char *argv[])
     for (int i = 0; i < N; i++)
         workersID[i] = i;
 
-    double startTime = 0, endTime = 0, elapsedTime = 0;
-    struct timespec time;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &time);
-    startTime = time.tv_nsec * 1e-9L;
+    //Determine executing start time
+    double elapsedTime = 0;
+    struct timespec startTime, endTime;
+    clock_gettime(CLOCK_MONOTONIC, &startTime);
 
     for (int i = 0; i < N; i++)
         if (pthread_create(&workers[i], NULL, work, (void *) &workersID[i]) != 0) /* thread producer */
@@ -71,34 +94,51 @@ int main(int argc, char *argv[])
         printf("its status was %d\n", *executionStatus);
     }
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &time);
-    endTime = time.tv_nsec * 1e-9L;
-    elapsedTime += endTime - startTime;
-    
+    //Determine executing time
+    clock_gettime(CLOCK_MONOTONIC, &endTime);
+    elapsedTime = (endTime. tv_nsec - startTime.tv_nsec) * 1e-9;     
     printf("\nElapsed time = %.6f s\n", elapsedTime);
 
+    //Get results
     struct sResults results[nFiles];
     sm_getResults(results);
-    printResults(results, nFiles);
+
+    //print results for each file
+    for(int i = 0; i < nFiles; i++)
+        printResults(results[i]);
 
     sm_close();
     exit(EXIT_SUCCESS);
 }
 
-void printResults(Results *results, unsigned int numberFiles)
+/** \brief Prints results of a given file.
+ * 
+ *  This function prints to stdout the corresponding processing results of 
+ *  a given file.
+ * 
+ *  \param results Structure contain file results
+*/
+void printResults(const Results results)
 {
-    for(int i = 0; i < numberFiles; i++)
-    {
-        fprintf(stdout,
-        "\nFile name: %s\n"
-        "Total number of words = %d\n"
-        "N. of words beginning with a vowel = %d\n"
-        "N. of words ending with a consonant = %d\n",
-        results[i].fileName, results[i].count.words, results[i].count.wordsBeginningInVowel, results[i].count.wordsEndingInConsoant);
-    }
-    
+    fprintf(stdout,
+    "\nFile name: %s\n"
+    "Total number of words = %d\n"
+    "N. of words beginning with a vowel = %d\n"
+    "N. of words ending with a consonant = %d\n",
+    results.fileName, results.count.words, results.count.wordsBeginningInVowel, results.count.wordsEndingInConsoant);
 }
 
+/** \brief Worker routine.
+ * 
+ *  The role of worker thread is to carry out the processing itself:
+ *  First it requests a piece of data to process, processes it and delivers the
+ *  results. 
+ *  
+ *  At the end the processing, the total number of words, words beginning in vowel
+ *  and words ending in consonant, of the corresponding piece of data, is determined.
+ * 
+ *  \param args Pointer to defined worker identification (int)
+*/
 static void * work(void * args)
 {
     while(true)
@@ -153,12 +193,6 @@ static void * work(void * args)
                     inWord = true;
                     break;
 
-                case ERROR:
-                    fprintf(stderr, "ERROR reading character\n");
-                    statusWorkers[id] = EXIT_FAILURE;
-                    pthread_exit(&statusWorkers[id]);
-                    break;
-
                 default:
                     break;
                 }
@@ -173,12 +207,6 @@ static void * work(void * args)
                         totalWordsEndingInConsoant++;
 
                     inWord = false;
-                    break;
-
-                case ERROR:
-                    fprintf(stderr, "ERROR reading character\n");
-                    statusWorkers[id] = EXIT_FAILURE;
-                    pthread_exit(&statusWorkers[id]);
                     break;
 
                 default:
@@ -199,7 +227,7 @@ static void * work(void * args)
             if(charType == ERROR)
                 printf("ERROR\n");         
             printf("%x\n", utf8Char); */
-            if (charType != NOT_DEFINED && charType != ERROR) // ignore case NOT_DEFINED or ERROR
+            if (charType != NOT_DEFINED) // ignore case NOT_DEFINED
                 lastCharType = charType; 
 
         } while (dataIdx < size);

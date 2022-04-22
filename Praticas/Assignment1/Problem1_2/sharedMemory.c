@@ -7,18 +7,41 @@
 #include "sharedMemory.h"
 #include "utf8.h"
 
+
+/**
+ *  \file sharedMemory.c
+ *
+ *  \brief Shared memory implementations
+ *  
+ *  Synchronization based on monitors.
+ * 
+ *  Definition of the operations carried out by the workers:
+ *     \li sm_getChunkOfData
+ *     \li sm_registerResult.
+ * 
+ *  Definition of the operations carried out by the main thread:
+ *     \li sm_initialize
+ *     \li sm_close.
+ *     \li sm_getResults
+ * 
+ *  \author João Diogo Ferreira, João Tiago Rainho - April 2022
+ */
+
+/** \brief Indicates current file being processed */
 static unsigned int fileIdx;
 
 /** \brief total number of files */
 static unsigned int numberOfFiles;
 
+/** \brief Information regarding a file and it's counting results */
 struct sFileHandler
 {
-    Count count;
-    char *fileName;
-    FILE *ptrFile;
+    Count count;        /*!< Counting results */
+    char *fileName;     /*!< File name */
+    FILE *ptrFile;      /*!< File stream */
 };
 
+/** \brief List of file handlers */
 static FileHandler handlers;
 
 /** \brief flag to check if sharedMemory is initialized */
@@ -31,21 +54,13 @@ static pthread_mutex_t accessCR = PTHREAD_MUTEX_INITIALIZER;
 int statusWorkers[N];
 
 
-int sm_registerFiles(int nFiles, char files[nFiles][MAX_FILE_NAME_SIZE])
+int sm_initialize(int nFiles, char files[nFiles][MAX_FILE_NAME_SIZE])
 {
     if (initialized)
     {
         fprintf(stderr, "Error shared memory already initialized");
         return FAILURE;
     }
-
-    // verify file path size
-    for (int i = 0; i < numberOfFiles; i++)
-        if (strlen(files[i]) > MAX_FILE_NAME_SIZE)
-        {
-            fprintf(stderr, "Error initializing file path excess MAX_FILE_NAME_SIZE");
-            return FAILURE;
-        }
 
     numberOfFiles = nFiles;
     fileIdx = 0;
@@ -82,14 +97,8 @@ int sm_registerFiles(int nFiles, char files[nFiles][MAX_FILE_NAME_SIZE])
     return SUCCESS;
 }
 
-
 int sm_close()
 {
-    if (!initialized)
-    {
-        fprintf(stderr, "Error shared memory not initialized");
-        return FAILURE;
-    }
     for(int i = 0; i < numberOfFiles; i++)
     {
         free(handlers[i].fileName);
@@ -99,7 +108,6 @@ int sm_close()
 
     return SUCCESS;
 }
-
 
 bool sm_getChunkOfData(int id, unsigned char data[DATA_BUFFER_SIZE], unsigned int *size, FileHandler *fileHandler)
 {
@@ -172,7 +180,6 @@ bool sm_getChunkOfData(int id, unsigned char data[DATA_BUFFER_SIZE], unsigned in
     return moreWorkToDo;
 } 
 
-
 void sm_registerResult(int id, FileHandler fileHandler, Count *count)
 {
     if (pthread_mutex_lock(&accessCR) != 0)
@@ -191,7 +198,6 @@ void sm_registerResult(int id, FileHandler fileHandler, Count *count)
         pthread_exit(&statusWorkers[id]);
     }
 }
-
 
 void sm_getResults(Results *results)
 {

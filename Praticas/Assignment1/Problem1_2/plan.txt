@@ -1,8 +1,0 @@
-
-worker:
-
-work()
-{
-    void getChunkOfData(unsigned char data[], PARTREST * pRes);
-    
-}
