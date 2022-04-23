@@ -1,0 +1,8 @@
+var searchData=
+[
+  ['sm_5fclose_0',['sm_close',['../sharedMemory_8c.html#acdba6eb2310386605ffaa530cd051dde',1,'sm_close():&#160;sharedMemory.c'],['../sharedMemory_8h.html#acdba6eb2310386605ffaa530cd051dde',1,'sm_close():&#160;sharedMemory.c']]],
+  ['sm_5fgetchunkofdata_1',['sm_getChunkOfData',['../sharedMemory_8c.html#a9d9277eb29321a610be9bb461969fb2a',1,'sm_getChunkOfData(int id, unsigned char data[DATA_BUFFER_SIZE], unsigned int *size, FileHandler *fileHandler):&#160;sharedMemory.c'],['../sharedMemory_8h.html#a9d9277eb29321a610be9bb461969fb2a',1,'sm_getChunkOfData(int id, unsigned char data[DATA_BUFFER_SIZE], unsigned int *size, FileHandler *fileHandler):&#160;sharedMemory.c']]],
+  ['sm_5fgetresults_2',['sm_getResults',['../sharedMemory_8c.html#a6db9192ad4993c3c2225f4a7f7fd6d8c',1,'sm_getResults(Results *results):&#160;sharedMemory.c'],['../sharedMemory_8h.html#a6db9192ad4993c3c2225f4a7f7fd6d8c',1,'sm_getResults(Results *results):&#160;sharedMemory.c']]],
+  ['sm_5finitialize_3',['sm_initialize',['../sharedMemory_8c.html#a103b9141e423a416c3cefaf7dc55bccd',1,'sm_initialize(int nFiles, char files[nFiles][MAX_FILE_NAME_SIZE]):&#160;sharedMemory.c'],['../sharedMemory_8h.html#a103b9141e423a416c3cefaf7dc55bccd',1,'sm_initialize(int nFiles, char files[nFiles][MAX_FILE_NAME_SIZE]):&#160;sharedMemory.c']]],
+  ['sm_5fregisterresult_4',['sm_registerResult',['../sharedMemory_8c.html#a989f3f908ac0b478b552d5a7056eabce',1,'sm_registerResult(int id, FileHandler fileHandler, Count *count):&#160;sharedMemory.c'],['../sharedMemory_8h.html#a989f3f908ac0b478b552d5a7056eabce',1,'sm_registerResult(int id, FileHandler fileHandler, Count *count):&#160;sharedMemory.c']]]
+];
