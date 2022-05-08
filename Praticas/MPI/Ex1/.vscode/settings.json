@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.txt": "plaintext",
+        "stdio.h": "c",
+        "mpi.h": "c",
+        "cstdio": "c"
+    }
+}
