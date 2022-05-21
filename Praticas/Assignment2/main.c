@@ -1,6 +1,7 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "probConst.h"
 #include "textFiles.h"
 #include "utf8.h"
@@ -8,7 +9,7 @@
 /** \brief Data chunk process by a worker a respective file handler */
 struct sChunk
 {
-    unsigned char data[DATA_BUFFER_SIZE];
+    uint8_t data[DATA_BUFFER_SIZE];
     FileHandler handler;
     Result result; /*!< Number of words ending in consoant */
                    /*!< Number of words beginning in vowel */
@@ -16,17 +17,26 @@ struct sChunk
 };
 typedef struct sChunk Chunk;
 
+void processChunkOfData(uint8_t data[DATA_BUFFER_SIZE], uint16_t dataSize, Result result);
+
 int main(int argc, char *argv[])
 {
+    //validate input arguments
+    if (argc == 1)
+    {
+        fprintf(stderr, "USAGE: ./countWords fileName [fileName ...]\n");
+        MPI_Finalize();
+        return EXIT_FAILURE;
+    }
+
     int rank, nProc, nWorkers;
-    int nFiles;
+    int nFiles = argc - 1;
     char fileNames[nFiles][MAX_FILE_NAME_SIZE];
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &nProc);
-    nWorkers = nProc - 1;
-
+    
     if (nProc <= 1)
     {
         if (rank == 0)
@@ -34,6 +44,8 @@ int main(int argc, char *argv[])
         MPI_Finalize();
         return EXIT_FAILURE;
     }
+    
+    nWorkers = nProc - 1;
 
     //------------------------
     //-------Dispatcher-------
@@ -41,18 +53,9 @@ int main(int argc, char *argv[])
     if (rank == 0)
     {
         // parseFiles
-        if (argc == 1)
-        {
-            fprintf(stderr, "USAGE: ./countWords fileName [fileName ...]\n");
-            MPI_Finalize();
-            return EXIT_FAILURE;
-        }
-
-        nFiles = argc - 1;
-
         for (int i = 0; i < nFiles; i++)
         {
-            if (strlen(fileNames[nFiles]) > MAX_FILE_NAME_SIZE)
+            if (strlen(argv[i + 1]) > MAX_FILE_NAME_SIZE)
             {
                 printf("File path is too long!\n");
                 MPI_Finalize();
@@ -61,16 +64,18 @@ int main(int argc, char *argv[])
             strcpy(fileNames[i], argv[i + 1]);
         }
 
+        tf_initialize(nFiles, fileNames);
+
         int ready[nWorkers];
         Chunk dataChunks[nWorkers];
-        MPI_Request requests[nWorkers];
+        MPI_Request recvRequests[nWorkers];
+        MPI_Request sendRequests[nWorkers];
 
         for (int i = 0; i < nWorkers; i++)
             ready[nWorkers] = true;
 
         bool first = true;
         bool moreChunks = true;
-
         while (moreChunks)
         {
             for (int i = 0; i < nWorkers; i++)
@@ -80,53 +85,66 @@ int main(int argc, char *argv[])
                     if (!first)
                         tf_registerResult(dataChunks[i].handler, dataChunks[i].result);
 
-                    moreChunks = readChunk(&dataChunks);
+                    int status = tf_readChunk(dataChunks[i].data, &(dataChunks[i].handler), &moreChunks);
+
+                    if(status == FAILURE)
+                    {
+                        printf("Error reading data chunk!\n");
+                        MPI_Finalize();
+                        return EXIT_FAILURE;
+                    }
+
                     if (!moreChunks)
                         break;
 
-                    MPI_Isend((void *)dataChunks[i].data, DATA_BUFFER_SIZE, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD, NULL);
-                    MPI_Irecv((void *)dataChunks[i].result, 3, MPI_UINT32_T, i + 1, 0, MPI_COMM_WORLD, &requests[i]);
+                    MPI_Isend((void *)dataChunks[i].data, DATA_BUFFER_SIZE, MPI_UINT8_T, i + 1, 0, MPI_COMM_WORLD, &sendRequests[i]);
+
+                    MPI_Irecv((void *)dataChunks[i].result, 3, MPI_UINT32_T, i + 1, 0, MPI_COMM_WORLD, &recvRequests[i]);
 
                     ready[i] = false;
                 }
-
-                MPI_Test(&requests[i], &ready[i], MPI_STATUS_IGNORE);
+                MPI_Test(&recvRequests[i], &ready[i], MPI_STATUS_IGNORE);
             }
             first = false;
         }
 
-        // Waiting pending workers (blocking)
+                    
+        // Waiting pending workers
         for (int i = 0; i < nWorkers; i++)
         {
+            bool pending = !ready[i];
+
             while (!ready[i])
-                MPI_Test(&requests[i], &ready[i], MPI_STATUS_IGNORE);
+                MPI_Test(&recvRequests[i], &ready[i], MPI_STATUS_IGNORE);
 
-            tf_registerResult(dataChunks[i].handler, dataChunks[i].result);
+            if(pending)
+                tf_registerResult(dataChunks[i].handler, dataChunks[i].result);
         }
 
-        // Send termination condition, i.e, dataChunk size 0 (blocking)
-        unsigned char finish[DATA_BUFFER_SIZE];
-        finish[DATA_BUFFER_SIZE - 1] = 0;
-        finish[DATA_BUFFER_SIZE] = 0;
+        printf("Send termination condition");
+
+        // Send termination condition, i.e., dataChunk size 0xFFFF
+        uint8_t finish[DATA_BUFFER_SIZE];
+        finish[DATA_BUFFER_SIZE - 2] = 0xFF;
+        finish[DATA_BUFFER_SIZE - 1] = 0xFF;
 
         for (int i = 0; i < nWorkers; i++)
-        {
-            MPI_Isend((void *)finish, DATA_BUFFER_SIZE, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD, NULL);
-        }
+            MPI_Isend((void *)finish, DATA_BUFFER_SIZE, MPI_UINT8_T, i + 1, 0, MPI_COMM_WORLD, &sendRequests[i]);
 
         // Print results
-
-        Result results;
-        int numberOfFiles = tf_getResults(results);
-        for (int i = 0; i < numberOfFiles; i++)
+        Result results[nFiles];
+        tf_getResults(results);
+        for (int i = 0; i < nFiles; i++)
         {
             fprintf(stdout,
                     "\nFile name: %s\n"
                     "Total number of words = %d\n"
                     "N. of words beginning with a vowel = %d\n"
                     "N. of words ending with a consonant = %d\n",
-                    fileNames[i], results[i][0], results[i][1], results[i][2]);
+                    fileNames[i], results[i][2], results[i][1], results[i][0]);
         }
+
+        tf_close();
     }
 
     //------------------------
@@ -135,19 +153,17 @@ int main(int argc, char *argv[])
     else
     {
         Result result;
-        unsigned char data[DATA_BUFFER_SIZE];
+        uint8_t data[DATA_BUFFER_SIZE];
 
         while (true)
         {
-            MPI_Recv( (void *) data, DATA_BUFFER_SIZE, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            uint16_t dataSize = (((uint16_t)data[DATA_BUFFER_SIZE - 1]) << 8) & ((uint16_t)data[DATA_BUFFER_SIZE - 1]);
-
+            MPI_Recv( (void *) data, DATA_BUFFER_SIZE, MPI_UINT8_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            uint16_t dataSize = (((uint16_t)data[DATA_BUFFER_SIZE - 1]) << 8) | ((uint16_t)data[DATA_BUFFER_SIZE - 2]);
             // Check is there is more work to do
-            if (dataSize == 0)
+            if (dataSize == 0xFFFF)
                 break;
-
+            
             processChunkOfData(data, dataSize, result);
-
             MPI_Send( (void *) result, 3, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD);
         }
     }
@@ -157,7 +173,7 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-void processChunkOfData(unsigned char data[DATA_BUFFER_SIZE], uint16_t dataSize, Result result)
+void processChunkOfData(uint8_t data[DATA_BUFFER_SIZE], uint16_t dataSize, Result result)
 {
     // process Chunk of data
     unsigned int totalWordsEndingInConsoant = 0;
@@ -226,5 +242,5 @@ void processChunkOfData(unsigned char data[DATA_BUFFER_SIZE], uint16_t dataSize,
 
     result[0] = totalWordsEndingInConsoant;
     result[1] = totalWordsBeginningInVowel;
-    result[0] = totalWords;
+    result[2] = totalWords;
 }

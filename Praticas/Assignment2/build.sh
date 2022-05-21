@@ -1,0 +1,1 @@
+mpicc -Wall main.c textFiles.c utf8.c -o main

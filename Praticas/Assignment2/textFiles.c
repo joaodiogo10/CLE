@@ -45,8 +45,8 @@ int tf_initialize(int nFiles, char files[nFiles][MAX_FILE_NAME_SIZE])
     {
         handlers[i].fileName = (char *) calloc(MAX_FILE_NAME_SIZE, sizeof(char));
         handlers[i].count[0] = 0; //Number of words ending in consoant
-        handlers[i].count[0] = 0; //Number of words beginning in vowel
-        handlers[i].count[0] = 0; //Total number of words
+        handlers[i].count[1] = 0; //Number of words beginning in vowel
+        handlers[i].count[2] = 0; //Total number of words
 
         strcpy(handlers[i].fileName , files[i]);
 
@@ -78,13 +78,14 @@ int tf_close()
     return SUCCESS;
 }
 
-int tf_readChunk(unsigned char data[DATA_BUFFER_SIZE], FileHandler *fileHandler, bool *moreWork)
+int tf_readChunk(uint8_t data[DATA_BUFFER_SIZE], FileHandler *fileHandler, bool *moreWork)
 {
     bool moreWorkToDo = true;
     uint16_t size = 0;
 
     if (fileIdx < numberOfFiles)
     {
+   
         *fileHandler = &handlers[fileIdx];
         FILE *file = handlers[fileIdx].ptrFile;
         
@@ -131,10 +132,12 @@ int tf_readChunk(unsigned char data[DATA_BUFFER_SIZE], FileHandler *fileHandler,
             }
         }
     }
+    else
+        moreWorkToDo = false;
 
     //store size in dataBuffer
-    data[DATA_BUFFER_SIZE - 1] = (unsigned char) (size & 0x00FF);
-    data[DATA_BUFFER_SIZE] = (unsigned char) ((size >> 8) & 0x00FF);
+    data[DATA_BUFFER_SIZE - 2] = (uint8_t) (size & 0x00FF);
+    data[DATA_BUFFER_SIZE - 1] = (uint8_t) ((size >> 8) & 0x00FF);
 
     *moreWork = moreWorkToDo;
     return SUCCESS;

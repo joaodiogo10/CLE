@@ -19,6 +19,6 @@
 #define MAX_FILE_NAME_SIZE 50       
 
 /** \brief size of worker's data chuck buffer, last 2 bytes of the chunk specifies the amount of data sent */
-#define DATA_BUFFER_SIZE 2 << 12 + 2 
+#define DATA_BUFFER_SIZE ((2 << 12) + 2) 
 
 #endif /* PROB_CONST_H_ */
