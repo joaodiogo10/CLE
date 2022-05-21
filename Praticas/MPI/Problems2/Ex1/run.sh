@@ -1,0 +1,1 @@
+mpiexec -n 4 ./ex1_scather_reduce

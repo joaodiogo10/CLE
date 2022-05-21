@@ -1,0 +1,1 @@
+mpicc -Wall ex1_scather_reduce.c -o ex1_scather_reduce

@@ -53,6 +53,7 @@ static pthread_mutex_t accessCR = PTHREAD_MUTEX_INITIALIZER;
 /** \brief worker threads return status array */
 int statusWorkers[N];
 
+
 int sm_initialize(int nFiles, char files[nFiles][MAX_FILE_NAME_SIZE])
 {
     if (initialized)
