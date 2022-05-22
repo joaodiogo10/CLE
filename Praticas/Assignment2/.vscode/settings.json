@@ -2,6 +2,7 @@
     "files.associations": {
         "*.txt": "plaintext",
         "mpi.h": "c",
-        "probconst.h": "c"
+        "probconst.h": "c",
+        "pthread.h": "c"
     }
 }

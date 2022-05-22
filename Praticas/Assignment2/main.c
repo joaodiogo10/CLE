@@ -1,5 +1,6 @@
 #include <mpi.h>
 #include <stdio.h>
+#include <time.h>
 #include <stdlib.h>
 #include <string.h>
 #include "probConst.h"
@@ -64,7 +65,13 @@ int main(int argc, char *argv[])
             strcpy(fileNames[i], argv[i + 1]);
         }
 
-        tf_initialize(nFiles, fileNames);
+        int status = tf_initialize(nFiles, fileNames);
+        if(status == FAILURE)
+        {
+            printf("File to initialize text files!\n");
+            MPI_Finalize();
+            return EXIT_FAILURE;
+        }
 
         int ready[nWorkers];
         Chunk dataChunks[nWorkers];
@@ -76,6 +83,11 @@ int main(int argc, char *argv[])
 
         bool first = true;
         bool moreChunks = true;
+
+        //Determine executing start time
+        struct timespec startTime, endTime;
+        clock_gettime(CLOCK_MONOTONIC, &startTime);
+
         while (moreChunks)
         {
             for (int i = 0; i < nWorkers; i++)
@@ -98,7 +110,6 @@ int main(int argc, char *argv[])
                         break;
 
                     MPI_Isend((void *)dataChunks[i].data, DATA_BUFFER_SIZE, MPI_UINT8_T, i + 1, 0, MPI_COMM_WORLD, &sendRequests[i]);
-
                     MPI_Irecv((void *)dataChunks[i].result, 3, MPI_UINT32_T, i + 1, 0, MPI_COMM_WORLD, &recvRequests[i]);
 
                     ready[i] = false;
@@ -113,7 +124,7 @@ int main(int argc, char *argv[])
         for (int i = 0; i < nWorkers; i++)
         {
             bool pending = !ready[i];
-
+            
             while (!ready[i])
                 MPI_Test(&recvRequests[i], &ready[i], MPI_STATUS_IGNORE);
 
@@ -130,6 +141,11 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i < nWorkers; i++)
             MPI_Isend((void *)finish, DATA_BUFFER_SIZE, MPI_UINT8_T, i + 1, 0, MPI_COMM_WORLD, &sendRequests[i]);
+
+        //Determine executing time
+        clock_gettime(CLOCK_MONOTONIC, &endTime);
+        printf ("\nElapsed time = %.6f s\n",  (endTime.tv_sec - startTime.tv_sec) / 1.0 + (endTime.tv_nsec - startTime.tv_nsec) / 1000000000.0);
+
 
         // Print results
         Result results[nFiles];

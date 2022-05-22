@@ -81,7 +81,7 @@ int tf_close()
 int tf_readChunk(uint8_t data[DATA_BUFFER_SIZE], FileHandler *fileHandler, bool *moreWork)
 {
     bool moreWorkToDo = true;
-    uint16_t size = 0;
+    size_t size = 0;
 
     if (fileIdx < numberOfFiles)
     {
@@ -122,7 +122,7 @@ int tf_readChunk(uint8_t data[DATA_BUFFER_SIZE], FileHandler *fileHandler, bool 
             if(getUTF8CharType(utf8Char) == DELIMITER)
             {
                 foundDelimiter = true;
-                (size) = size - goBackN + characterSize;       //count with last delimiter character
+                size = size - goBackN + characterSize;       //count with last delimiter character
 
                 if(fseek(file, (int)(-goBackN + characterSize), SEEK_CUR) != 0)
                 {
