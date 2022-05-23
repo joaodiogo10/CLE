@@ -92,6 +92,9 @@ int main(int argc, char *argv[])
         {
             for (int i = 0; i < nWorkers; i++)
             {
+                if(!first)
+                    MPI_Test(&recvRequests[i], &ready[i], MPI_STATUS_IGNORE);
+
                 if (ready[i])
                 {
                     if (!first)
@@ -114,11 +117,9 @@ int main(int argc, char *argv[])
 
                     ready[i] = false;
                 }
-                MPI_Test(&recvRequests[i], &ready[i], MPI_STATUS_IGNORE);
             }
             first = false;
         }
-
                     
         // Waiting pending workers
         for (int i = 0; i < nWorkers; i++)
@@ -133,7 +134,6 @@ int main(int argc, char *argv[])
         }
 
         printf("Send termination condition");
-
         // Send termination condition, i.e., dataChunk size 0xFFFF
         uint8_t finish[DATA_BUFFER_SIZE];
         finish[DATA_BUFFER_SIZE - 2] = 0xFF;
@@ -145,7 +145,6 @@ int main(int argc, char *argv[])
         //Determine executing time
         clock_gettime(CLOCK_MONOTONIC, &endTime);
         printf ("\nElapsed time = %.6f s\n",  (endTime.tv_sec - startTime.tv_sec) / 1.0 + (endTime.tv_nsec - startTime.tv_nsec) / 1000000000.0);
-
 
         // Print results
         Result results[nFiles];
