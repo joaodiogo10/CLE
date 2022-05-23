@@ -11,11 +11,13 @@
 
 void processChunkOfData(uint8_t data[DATA_BUFFER_SIZE], uint16_t dataSize, Result result);
 
-void * codeReadingThread(void * args);
+void *codeReadingThread(void *args);
+
+void *codeProxyThread(void *args);
 
 int main(int argc, char *argv[])
 {
-    //validate input arguments
+    // validate input arguments
     if (argc == 1)
     {
         fprintf(stderr, "USAGE: ./countWords fileName [fileName ...]\n");
@@ -26,11 +28,16 @@ int main(int argc, char *argv[])
     int rank, nProc, nWorkers;
     int nFiles = argc - 1;
     char fileNames[nFiles][MAX_FILE_NAME_SIZE];
+    int provided;
+    
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+    if (provided != MPI_THREAD_MULTIPLE)
+        fprintf(stderr, "Warning MPI did not provide MPI_THREAD_FUNNELED\n");
 
-    MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &nProc);
     
+
     if (nProc <= 1)
     {
         if (rank == 0)
@@ -38,7 +45,7 @@ int main(int argc, char *argv[])
         MPI_Finalize();
         return EXIT_FAILURE;
     }
-    
+
     nWorkers = nProc - 1;
 
     //------------------------
@@ -59,88 +66,43 @@ int main(int argc, char *argv[])
         }
 
         int status = tf_initialize(nFiles, fileNames);
-        if(status == FAILURE)
+        if (status == FAILURE)
         {
             printf("File to initialize text files!\n");
             MPI_Finalize();
             return EXIT_FAILURE;
         }
 
+        // Determine executing start time
+        struct timespec startTime, endTime;
+        clock_gettime(CLOCK_MONOTONIC, &startTime);
+
         // create reading thread
         pthread_t readingThread;
         pthread_create(&readingThread, NULL, codeReadingThread, NULL);
 
-        int ready[nWorkers];
-        Chunk *dataChunks[nWorkers];
-        MPI_Request sendRequests[nWorkers];
-        MPI_Request recvRequests[nWorkers];
+        // launch proxy threads
+        pthread_t proxyThread[nWorkers];
+        int workerIDs[nWorkers];
 
-        for (int i = 0; i < nWorkers; i++)
-            ready[nWorkers] = true;
-
-        bool first = true;
-        bool moreChunks = true;
-
-        //Determine executing start time
-        struct timespec startTime, endTime;
-        clock_gettime(CLOCK_MONOTONIC, &startTime);
-
-        while (moreChunks)
-        {
-            for (int i = 0; i < nWorkers; i++)
-            {
-                if(!first)
-                    MPI_Test(&recvRequests[i], &ready[i], MPI_STATUS_IGNORE);
-                    
-                if (ready[i])
-                {
-                    if (!first)
-                    {
-                        tf_registerResult(dataChunks[i]->handler, dataChunks[i]->result);
-                        free(dataChunks[i]);
-                    }
-
-                    moreChunks = getChunk(&dataChunks[i]);
-
-                    if (!moreChunks)
-                        break;
-
-                    MPI_Isend((void *)dataChunks[i]->data, DATA_BUFFER_SIZE, MPI_UINT8_T, i + 1, 0, MPI_COMM_WORLD, &sendRequests[i]);
-                    MPI_Irecv((void *)dataChunks[i]->result, 3, MPI_UINT32_T, i + 1, 0, MPI_COMM_WORLD, &recvRequests[i]);
-
-                    ready[i] = false;
-                }
-            }
-            first = false;
-        }
-                    
-        // Waiting pending workers
         for (int i = 0; i < nWorkers; i++)
         {
-            bool pending = !ready[i];
-            
-            while (!ready[i])
-                MPI_Test(&recvRequests[i], &ready[i], MPI_STATUS_IGNORE);
-
-            if(pending)
-                tf_registerResult(dataChunks[i]->handler, dataChunks[i]->result);
+            workerIDs[i] = i + 1;
+            pthread_create(&proxyThread[i], NULL, codeProxyThread, (void *)&workerIDs[i]);
         }
 
-        // Send termination condition, i.e., dataChunk size 0xFFFF
-        uint8_t finish[DATA_BUFFER_SIZE];
-        finish[DATA_BUFFER_SIZE - 2] = 0xFF;
-        finish[DATA_BUFFER_SIZE - 1] = 0xFF;
-
-        for (int i = 0; i < nWorkers; i++)
-            MPI_Isend((void *)finish, DATA_BUFFER_SIZE, MPI_UINT8_T, i + 1, 0, MPI_COMM_WORLD, &sendRequests[i]);
-
-        
         // wait for reading threads
         pthread_join(readingThread, NULL);
 
-        //Determine executing time
+        // join working threads
+        for (int i = 0; i < nWorkers; i++)
+        {
+            pthread_join(proxyThread[i], NULL);
+        }
+
+        // Determine executing time
         clock_gettime(CLOCK_MONOTONIC, &endTime);
-        printf ("\nElapsed time = %.6f s\n",  (endTime.tv_sec - startTime.tv_sec) / 1.0 + (endTime.tv_nsec - startTime.tv_nsec) / 1000000000.0);
+        printf("\nElapsed time = %.6f s\n", (endTime.tv_sec - startTime.tv_sec) / 1.0 + (endTime.tv_nsec - startTime.tv_nsec) / 1000000000.0);
 
         // Print results
         Result results[nFiles];
@@ -168,14 +130,14 @@ int main(int argc, char *argv[])
 
         while (true)
         {
-            MPI_Recv( (void *) data, DATA_BUFFER_SIZE, MPI_UINT8_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv((void *)data, DATA_BUFFER_SIZE, MPI_UINT8_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             uint16_t dataSize = (((uint16_t)data[DATA_BUFFER_SIZE - 1]) << 8) | ((uint16_t)data[DATA_BUFFER_SIZE - 2]);
             // Check is there is more work to do
             if (dataSize == 0xFFFF)
                 break;
 
             processChunkOfData(data, dataSize, result);
-            MPI_Send( (void *) result, 3, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD);
+            MPI_Send((void *)result, 3, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD);
         }
     }
 
@@ -256,22 +218,54 @@ void processChunkOfData(uint8_t data[DATA_BUFFER_SIZE], uint16_t dataSize, Resul
     result[2] = totalWords;
 }
 
+void *codeProxyThread(void *args)
+{
+    Chunk * dataChunk;
+    unsigned int workerId = *((int *)args);
 
-void * codeReadingThread(void * args) {
+    while (true)
+    {
+        int moreChunk = getChunk(&dataChunk);
+
+        if (!moreChunk)
+        {
+            // Send termination condition, i.e., dataChunk size 0xFFFF
+            uint8_t finish[DATA_BUFFER_SIZE];
+            finish[DATA_BUFFER_SIZE - 2] = 0xFF;
+            finish[DATA_BUFFER_SIZE - 1] = 0xFF;
+
+            MPI_Send((void *)finish, DATA_BUFFER_SIZE, MPI_UINT8_T, workerId, 0, MPI_COMM_WORLD);
+            break;
+        }
+
+        // send data chunk
+        MPI_Send((void *)&dataChunk->data, DATA_BUFFER_SIZE, MPI_UINT8_T, workerId, 0, MPI_COMM_WORLD);
+
+        // receive result
+        MPI_Recv((void *)dataChunk->result, 3, MPI_UINT32_T, workerId, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        
+        tf_registerResult(dataChunk->handler, dataChunk->result);
+        free(dataChunk);
+    }
+    return NULL;
+}
+
+void *codeReadingThread(void *args)
+{
 
     bool moreChunks = true;
-    while(moreChunks)
+    while (moreChunks)
     {
-        Chunk *dataChunk = (Chunk *) malloc(sizeof(Chunk));
+        Chunk *dataChunk = (Chunk *)malloc(sizeof(Chunk));
         int status = tf_readChunk(dataChunk->data, &(dataChunk->handler), &moreChunks);
-        if(status == FAILURE)
+        if (status == FAILURE)
         {
             printf("Error reading data chunk!\n");
             MPI_Finalize();
             return NULL;
         }
 
-        if(moreChunks)
+        if (moreChunks)
             putChunk(dataChunk);
     }
 
