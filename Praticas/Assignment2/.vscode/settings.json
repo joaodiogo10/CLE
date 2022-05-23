@@ -3,6 +3,7 @@
         "*.txt": "plaintext",
         "mpi.h": "c",
         "probconst.h": "c",
-        "pthread.h": "c"
+        "pthread.h": "c",
+        "textfiles.h": "c"
     }
 }

@@ -21,4 +21,7 @@
 /** \brief size of worker's data chuck buffer, last 2 bytes of the chunk specifies the amount of data sent */
 #define DATA_BUFFER_SIZE ((2 << 12) + 2) 
 
+/** \brief maximum size of fifo */
+#define FIFO_MAX_SIZE 20
+
 #endif /* PROB_CONST_H_ */
