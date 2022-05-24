@@ -6,12 +6,6 @@
 #include "probConst.h"
 #include "textFiles.h"
 
-/** \brief producer threads return status array */
-int statusProd;
-
-/** \brief consumer threads return status array */
-int statusCons;
-
 /** \brief Data chunk process by a worker a respective file handler */
 struct sChunk
 {
@@ -33,9 +27,10 @@ extern void putChunk(Chunk * data);
 /** \brief Fetches a data chunk from the fifo
  *  
  *  \param[out] data chunk of data pinter.
+ *  \param[in] proxyId Proxy thread id. 
  *  \return True if there are more chunk of data to retrieve. False otherwise.
  */
-extern bool getChunk(Chunk **data);
+extern bool getChunk(unsigned int proxyId, Chunk **data);
 
 /** \brief Indication that all files have been read.
  *  

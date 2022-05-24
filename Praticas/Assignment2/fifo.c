@@ -5,11 +5,11 @@
 #include <errno.h>
 #include "fifo.h"
 
-/** \brief producer threads return status array */
-extern int statusProd;
+/** \brief reading thread return status */
+extern int statusReadingThread;
 
-/** \brief consumer threads return status array */
-extern int statusCons;
+/** \brief proxy threads return status */
+extern int * statusProxyThread;
 
 /** \brief storage region */
 static Chunk * mem[FIFO_MAX_SIZE];
@@ -65,21 +65,21 @@ void doneReading() {
 
 void putChunk(Chunk * data)
 {
-  if ((statusProd = pthread_mutex_lock (&accessCR)) != 0)                                   /* enter monitor */
-     { errno = statusProd;                                                            /* save error in errno */
+  if ((statusReadingThread = pthread_mutex_lock (&accessCR)) != 0)                                   /* enter monitor */
+     { errno = statusReadingThread;                                                            /* save error in errno */
        perror ("error on entering monitor(CF)");
-       statusProd = EXIT_FAILURE;
-       pthread_exit (&statusProd);
+       statusReadingThread = EXIT_FAILURE;
+       pthread_exit (&statusReadingThread);
      }
   pthread_once (&init, initialization);                                              /* internal data initialization */
   
 
   while (full)                                                           /* wait if the data transfer region is full */
-  { if ((statusProd = pthread_cond_wait (&fifoFull, &accessCR)) != 0)
-       { errno = statusProd;                                                          /* save error in errno */
+  { if ((statusReadingThread = pthread_cond_wait (&fifoFull, &accessCR)) != 0)
+       { errno = statusReadingThread;                                                          /* save error in errno */
          perror ("error on waiting in fifoFull");
-         statusProd = EXIT_FAILURE;
-         pthread_exit (&statusProd);
+         statusReadingThread = EXIT_FAILURE;
+         pthread_exit (&statusReadingThread);
        }
   }
 
@@ -87,30 +87,30 @@ void putChunk(Chunk * data)
   ii = (ii + 1) % FIFO_MAX_SIZE;
   full = (ii == ri);
 
-  if ((statusProd = pthread_cond_signal (&fifoEmpty)) != 0)      /* let a consumer know that a value has been
+  if ((statusReadingThread = pthread_cond_signal (&fifoEmpty)) != 0)      /* let a consumer know that a value has been
                                                                                                                stored */
-     { errno = statusProd;                                                             /* save error in errno */
+     { errno = statusReadingThread;                                                             /* save error in errno */
        perror ("error on signaling in fifoEmpty");
-       statusProd = EXIT_FAILURE;
-       pthread_exit (&statusProd);
+       statusReadingThread = EXIT_FAILURE;
+       pthread_exit (&statusReadingThread);
      }
 
-  if ((statusProd = pthread_mutex_unlock (&accessCR)) != 0)                                  /* exit monitor */
-     { errno = statusProd;                                                            /* save error in errno */
+  if ((statusReadingThread = pthread_mutex_unlock (&accessCR)) != 0)                                  /* exit monitor */
+     { errno = statusReadingThread;                                                            /* save error in errno */
        perror ("error on exiting monitor(CF)");
-       statusProd = EXIT_FAILURE;
-       pthread_exit (&statusProd);
+       statusReadingThread = EXIT_FAILURE;
+       pthread_exit (&statusReadingThread);
      }
 }
 
-bool getChunk(Chunk **data)
+bool getChunk(unsigned int proxyId, Chunk **data)
 {
 
-  if ((statusCons = pthread_mutex_lock (&accessCR)) != 0)                                   /* enter monitor */
-     { errno = statusCons;                                                            /* save error in errno */
+  if ((statusProxyThread[proxyId] = pthread_mutex_lock (&accessCR)) != 0)                                   /* enter monitor */
+     { errno = statusProxyThread[proxyId];                                                            /* save error in errno */
        perror ("error on entering monitor(CF)");
-       statusCons = EXIT_FAILURE;
-       pthread_exit (&statusCons);
+       statusProxyThread[proxyId] = EXIT_FAILURE;
+       pthread_exit (&statusProxyThread[proxyId]);
      }
   pthread_once (&init, initialization);                                              /* internal data initialization */
 
@@ -120,12 +120,12 @@ bool getChunk(Chunk **data)
       pthread_mutex_unlock (&accessCR);
       return false;
     }
-    if ((statusCons = pthread_cond_wait (&fifoEmpty, &accessCR)) != 0)
+    if ((statusProxyThread[proxyId] = pthread_cond_wait (&fifoEmpty, &accessCR)) != 0)
        {
-         errno = statusCons;                                                          /* save error in errno */
+         errno = statusProxyThread[proxyId];                                                          /* save error in errno */
          perror ("error on waiting in fifoEmpty");
-         statusCons = EXIT_FAILURE;
-         pthread_exit (&statusCons);
+         statusProxyThread[proxyId] = EXIT_FAILURE;
+         pthread_exit (&statusProxyThread[proxyId]);
        }
   }
 
@@ -133,19 +133,20 @@ bool getChunk(Chunk **data)
   ri = (ri + 1) % FIFO_MAX_SIZE;
   full = false;
 
-  if ((statusCons = pthread_cond_signal (&fifoFull)) != 0)       /* let a producer know that a value has been
+  if ((statusProxyThread[proxyId] = pthread_cond_signal (&fifoFull)) != 0)       /* let a producer know that a value has been
                                                                                                             retrieved */
-     { errno = statusCons;                                                             /* save error in errno */
+     { errno = statusProxyThread[proxyId];                                                             /* save error in errno */
        perror ("error on signaling in fifoFull");
-       statusCons = EXIT_FAILURE;
-       pthread_exit (&statusCons);
+       statusProxyThread[proxyId] = EXIT_FAILURE;
+       pthread_exit (&statusProxyThread[proxyId]);
      }
 
-  if ((statusCons = pthread_mutex_unlock (&accessCR)) != 0)                                   /* exit monitor */
-     { errno = statusCons;                                                             /* save error in errno */
+  if ((statusProxyThread[proxyId] = pthread_mutex_unlock (&accessCR)) != 0)                                   /* exit monitor */
+     { errno = statusProxyThread[proxyId];                                                             /* save error in errno */
        perror ("error on exiting monitor(CF)");
-       statusCons = EXIT_FAILURE;
-       pthread_exit (&statusCons);
+       statusProxyThread[proxyId] = EXIT_FAILURE;
+       pthread_exit (&statusProxyThread[proxyId]);
      }
+
   return true;
 }

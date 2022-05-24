@@ -9,11 +9,17 @@
 #include "utf8.h"
 #include "fifo.h"
 
-void processChunkOfData(uint8_t data[DATA_BUFFER_SIZE], uint16_t dataSize, Result result);
+/** \brief reading thread return status */
+int statusReadingThread;
 
-void *codeReadingThread(void *args);
+/** \brief proxy threads return status */
+int * statusProxyThread;
 
-void *codeProxyThread(void *args);
+static void processChunkOfData(uint8_t data[DATA_BUFFER_SIZE], uint16_t dataSize, Result result);
+
+static void *codeReadingThread(void *args);
+
+static void *codeProxyThread(void *args);
 
 int main(int argc, char *argv[])
 {
@@ -22,7 +28,7 @@ int main(int argc, char *argv[])
     {
         fprintf(stderr, "USAGE: ./countWords fileName [fileName ...]\n");
         MPI_Finalize();
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
 
     int rank, nProc, nWorkers;
@@ -32,18 +38,20 @@ int main(int argc, char *argv[])
     
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if (provided != MPI_THREAD_MULTIPLE)
-        fprintf(stderr, "Warning MPI did not provide MPI_THREAD_FUNNELED\n");
-
+    {
+        fprintf(stderr, "Warning MPI did not provide MPI_THREAD_MULTIPLE\n");
+        MPI_Finalize();
+        exit(EXIT_FAILURE);
+    }
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &nProc);
     
-
     if (nProc <= 1)
     {
         if (rank == 0)
             printf("Wrong number of processes! It must be greater than 1.\n");
         MPI_Finalize();
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
 
     nWorkers = nProc - 1;
@@ -58,9 +66,9 @@ int main(int argc, char *argv[])
         {
             if (strlen(argv[i + 1]) > MAX_FILE_NAME_SIZE)
             {
-                printf("File path is too long!\n");
+                fprintf(stderr, "File path is too long!\n");
                 MPI_Finalize();
-                return EXIT_FAILURE;
+                exit(EXIT_FAILURE);
             }
             strcpy(fileNames[i], argv[i + 1]);
         }
@@ -68,18 +76,32 @@ int main(int argc, char *argv[])
         int status = tf_initialize(nFiles, fileNames);
         if (status == FAILURE)
         {
-            printf("File to initialize text files!\n");
+            fprintf(stderr, "Failed to initialize text files!\n");
             MPI_Finalize();
-            return EXIT_FAILURE;
+            exit(EXIT_FAILURE);
         }
+        
+        //intialize proxies return status storage
+        statusProxyThread = (int *) malloc(nWorkers * sizeof(int));
+        if(statusProxyThread == NULL)
+        {
+            fprintf(stderr  , "Failed to alocate proxies return status storage\n");
+            MPI_Finalize();
+            exit(EXIT_FAILURE);
+        } 
 
         // Determine executing start time
         struct timespec startTime, endTime;
         clock_gettime(CLOCK_MONOTONIC, &startTime);
 
-        // create reading thread
+        // launch reading thread
         pthread_t readingThread;
-        pthread_create(&readingThread, NULL, codeReadingThread, NULL);
+        if (pthread_create(&readingThread, NULL, codeReadingThread, NULL) != 0)
+        {
+            fprintf(stdout, "Error on creating reader thread\n");
+            MPI_Finalize();
+            exit(EXIT_FAILURE);
+        }
 
         // launch proxy threads
         pthread_t proxyThread[nWorkers];
@@ -88,16 +110,36 @@ int main(int argc, char *argv[])
         for (int i = 0; i < nWorkers; i++)
         {
             workerIDs[i] = i + 1;
-            pthread_create(&proxyThread[i], NULL, codeProxyThread, (void *)&workerIDs[i]);
+            if (pthread_create(&proxyThread[i], NULL, codeProxyThread, (void *)&workerIDs[i])  != 0)
+            {
+                fprintf(stdout, "Error on creating worker thread\n");
+                MPI_Finalize();
+                exit(EXIT_FAILURE);
+            }
         }
 
         // wait for reading threads
-        pthread_join(readingThread, NULL);
+        int *executionStatus;
+        if(pthread_join(readingThread, (void *) &executionStatus) != 0)
+        {
+            fprintf(stdout, "Error on waiting reader thread\n");
+            MPI_Finalize();
+            exit(EXIT_FAILURE);
+        }
+        printf("thread reader, has terminated: ");
+        printf("its status was %d\n", *executionStatus);
 
         // join working threads
         for (int i = 0; i < nWorkers; i++)
         {
-            pthread_join(proxyThread[i], NULL);
+            if(pthread_join(proxyThread[i], (void *) &executionStatus) != 0)
+            {
+                fprintf(stdout, "Error on waiting worker thread %d\n", i);
+                MPI_Finalize();
+                exit(EXIT_FAILURE);
+            }
+            printf("thread proxy, with id %u, has terminated: ", i);
+            printf("its status was %d\n", *executionStatus);
         }
 
         // Determine executing time
@@ -142,11 +184,10 @@ int main(int argc, char *argv[])
     }
 
     MPI_Finalize();
-
-    return EXIT_SUCCESS;
+    exit(EXIT_FAILURE);
 }
 
-void processChunkOfData(uint8_t data[DATA_BUFFER_SIZE], uint16_t dataSize, Result result)
+static void processChunkOfData(uint8_t data[DATA_BUFFER_SIZE], uint16_t dataSize, Result result)
 {
     // process Chunk of data
     unsigned int totalWordsEndingInConsoant = 0;
@@ -218,14 +259,14 @@ void processChunkOfData(uint8_t data[DATA_BUFFER_SIZE], uint16_t dataSize, Resul
     result[2] = totalWords;
 }
 
-void *codeProxyThread(void *args)
+static void *codeProxyThread(void *args)
 {
     Chunk * dataChunk;
     unsigned int workerId = *((int *)args);
 
     while (true)
     {
-        int moreChunk = getChunk(&dataChunk);
+        int moreChunk = getChunk(statusProxyThread[workerId], &dataChunk);
 
         if (!moreChunk)
         {
@@ -247,10 +288,11 @@ void *codeProxyThread(void *args)
         tf_registerResult(dataChunk->handler, dataChunk->result);
         free(dataChunk);
     }
-    return NULL;
+    statusProxyThread[workerId] = EXIT_SUCCESS;
+    pthread_exit(&statusProxyThread[workerId]);
 }
 
-void *codeReadingThread(void *args)
+static void *codeReadingThread(void *args)
 {
 
     bool moreChunks = true;
@@ -260,9 +302,10 @@ void *codeReadingThread(void *args)
         int status = tf_readChunk(dataChunk->data, &(dataChunk->handler), &moreChunks);
         if (status == FAILURE)
         {
-            printf("Error reading data chunk!\n");
+            fprintf(stderr, "Error reading data chunk!\n");
             MPI_Finalize();
-            return NULL;
+            statusReadingThread = EXIT_FAILURE;
+            pthread_exit(&statusReadingThread);
         }
 
         if (moreChunks)
@@ -270,6 +313,6 @@ void *codeReadingThread(void *args)
     }
 
     doneReading();
-
-    return NULL;
+    statusReadingThread = EXIT_SUCCESS;
+    pthread_exit(&statusReadingThread);
 }
