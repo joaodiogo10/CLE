@@ -1,0 +1,78 @@
+\hypertarget{main_8c}{}\doxysection{/home/joao/\+Desktop/\+CLE/\+Praticas/\+Assignment2/src/main.c File Reference}
+\label{main_8c}\index{/home/joao/Desktop/CLE/Praticas/Assignment2/src/main.c@{/home/joao/Desktop/CLE/Praticas/Assignment2/src/main.c}}
+
+
+Text processing in Portuguese program ~\newline
+  
+
+
+{\ttfamily \#include $<$mpi.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$pthread.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}prob\+Const.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}text\+Files.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}utf8.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}fifo.\+h\char`\"{}}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{main_8c_a2f4794ebd0020ffee42e1f8bc319cc0a}\label{main_8c_a2f4794ebd0020ffee42e1f8bc319cc0a}} 
+void {\bfseries process\+Chunk\+Of\+Data} (uint8\+\_\+t data\mbox{[}\mbox{\hyperlink{probConst_8h_ab723c5f0e9759c70ed582dfd77431ff7}{DATA\+\_\+\+BUFFER\+\_\+\+SIZE}}\mbox{]}, uint16\+\_\+t data\+Size, \mbox{\hyperlink{textFiles_8h_abac8cec6315f90bd845c93a8882fd48a}{Result}} result)
+\begin{DoxyCompactList}\small\item\em Gives the couting results of a given chunk of data. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{main_8c_a9c122ff21e734bc59ba16bf7d405551f}\label{main_8c_a9c122ff21e734bc59ba16bf7d405551f}} 
+void $\ast$ {\bfseries code\+Reading\+Thread} (void $\ast$args)
+\begin{DoxyCompactList}\small\item\em Execution code of file reader thread. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{main_8c_ad8f009ae1e6840faaa7e2a753e4abf94}\label{main_8c_ad8f009ae1e6840faaa7e2a753e4abf94}} 
+void $\ast$ {\bfseries code\+Proxy\+Thread} (void $\ast$args)
+\begin{DoxyCompactList}\small\item\em Execution code of proxy thread. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{main_8c_ad492f8d4ffaf82eb139ed8dad7e93173}\label{main_8c_ad492f8d4ffaf82eb139ed8dad7e93173}} 
+void {\bfseries send\+Termination\+Condition} (unsigned int worker\+Id)
+\begin{DoxyCompactList}\small\item\em Send termination condition message to the target worker. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{main_8c_a0ddf1224851353fc92bfbff6f499fa97}\label{main_8c_a0ddf1224851353fc92bfbff6f499fa97}} 
+int {\bfseries main} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{main_8c_a77c5addb8f4e8ef1698b5aff29c717be}{status\+Reading\+Thread}}
+\begin{DoxyCompactList}\small\item\em Reading thread return status. \end{DoxyCompactList}\item 
+int $\ast$ \mbox{\hyperlink{main_8c_a80b9e3fd018709232eebd04671a57be9}{status\+Proxy\+Thread}}
+\begin{DoxyCompactList}\small\item\em Proxy threads return status. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Text processing in Portuguese program ~\newline
+ 
+
+This program reads in succession several text files text\#.txt whose names are provided in the command line and prints a listing of total number of words, number of words beginning with a vowel and number of words ending with a consonant for each of the supplied files.
+
+\begin{DoxyAuthor}{Author}
+João Diogo Ferreira, João Tiago Rainho -\/ May 2022 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{main_8c_a80b9e3fd018709232eebd04671a57be9}\label{main_8c_a80b9e3fd018709232eebd04671a57be9}} 
+\index{main.c@{main.c}!statusProxyThread@{statusProxyThread}}
+\index{statusProxyThread@{statusProxyThread}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{statusProxyThread}{statusProxyThread}}
+{\footnotesize\ttfamily int$\ast$ status\+Proxy\+Thread}
+
+
+
+Proxy threads return status. 
+
+proxy threads return status \mbox{\Hypertarget{main_8c_a77c5addb8f4e8ef1698b5aff29c717be}\label{main_8c_a77c5addb8f4e8ef1698b5aff29c717be}} 
+\index{main.c@{main.c}!statusReadingThread@{statusReadingThread}}
+\index{statusReadingThread@{statusReadingThread}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{statusReadingThread}{statusReadingThread}}
+{\footnotesize\ttfamily int status\+Reading\+Thread}
+
+
+
+Reading thread return status. 
+
+reading thread return status 

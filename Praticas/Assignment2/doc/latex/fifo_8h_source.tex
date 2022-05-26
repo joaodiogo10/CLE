@@ -1,0 +1,30 @@
+\hypertarget{fifo_8h_source}{}\doxysection{fifo.\+h}
+\label{fifo_8h_source}\index{/home/joao/Desktop/CLE/Praticas/Assignment2/src/fifo.h@{/home/joao/Desktop/CLE/Praticas/Assignment2/src/fifo.h}}
+\mbox{\hyperlink{fifo_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#ifndef FIFO\_H}}
+\DoxyCodeLine{2 \textcolor{preprocessor}{\#define FIFO\_H}}
+\DoxyCodeLine{3 }
+\DoxyCodeLine{4 \textcolor{preprocessor}{\#include <stdio.h>}}
+\DoxyCodeLine{5 \textcolor{preprocessor}{\#include <stdint.h>}}
+\DoxyCodeLine{6 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{probConst_8h}{probConst.h}}"{}}}
+\DoxyCodeLine{7 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{textFiles_8h}{textFiles.h}}"{}}}
+\DoxyCodeLine{8 }
+\DoxyCodeLine{18 \textcolor{keyword}{struct }\mbox{\hyperlink{structsChunk}{sChunk}}}
+\DoxyCodeLine{19 \{}
+\DoxyCodeLine{20     uint8\_t data[\mbox{\hyperlink{probConst_8h_ab723c5f0e9759c70ed582dfd77431ff7}{DATA\_BUFFER\_SIZE}}];}
+\DoxyCodeLine{21     \mbox{\hyperlink{structsFileHandler}{FileHandler}} handler;}
+\DoxyCodeLine{22     \mbox{\hyperlink{textFiles_8h_abac8cec6315f90bd845c93a8882fd48a}{Result}} \mbox{\hyperlink{structsChunk_a310fb280dce4d2797895726963a2125a}{result}}; }
+\DoxyCodeLine{25 \};}
+\DoxyCodeLine{26 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\mbox{\hyperlink{structsChunk}{sChunk}} \mbox{\hyperlink{structsChunk}{Chunk}};}
+\DoxyCodeLine{27 }
+\DoxyCodeLine{32 \textcolor{keyword}{extern} \textcolor{keywordtype}{void} \mbox{\hyperlink{fifo_8h_ad2821b4fb82d40239d217ec998081ad3}{putChunk}}(\mbox{\hyperlink{structsChunk}{Chunk}} * data);}
+\DoxyCodeLine{33 }
+\DoxyCodeLine{34 }
+\DoxyCodeLine{41 \textcolor{keyword}{extern} \textcolor{keywordtype}{bool} \mbox{\hyperlink{fifo_8h_ad4703c1bda0f307ecc27b21ba9663a93}{getChunk}}(\textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{int} proxyId, \mbox{\hyperlink{structsChunk}{Chunk}} **data);}
+\DoxyCodeLine{42 }
+\DoxyCodeLine{47 \textcolor{keyword}{extern} \textcolor{keywordtype}{void} \mbox{\hyperlink{fifo_8h_ad25ddc7f6c296f23f3b656da5084b544}{doneReading}}();}
+\DoxyCodeLine{48 }
+\DoxyCodeLine{49 \textcolor{preprocessor}{\#endif }\textcolor{comment}{/* FIFO\_H */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

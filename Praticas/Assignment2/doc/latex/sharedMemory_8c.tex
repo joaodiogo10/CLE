@@ -1,0 +1,171 @@
+\hypertarget{sharedMemory_8c}{}\doxysection{/home/joao/\+Desktop/\+CLE/\+Praticas/\+Assignment1/\+Problem1\+\_\+2/src/shared\+Memory.c File Reference}
+\label{sharedMemory_8c}\index{/home/joao/Desktop/CLE/Praticas/Assignment1/Problem1\_2/src/sharedMemory.c@{/home/joao/Desktop/CLE/Praticas/Assignment1/Problem1\_2/src/sharedMemory.c}}
+
+
+Shared memory implementations.  
+
+
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$pthread.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}shared\+Memory.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}utf8.\+h\char`\"{}}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structsFileHandler}{s\+File\+Handler}}
+\begin{DoxyCompactList}\small\item\em Information regarding a file and it\textquotesingle{}s counting results. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{sharedMemory_8c_a103b9141e423a416c3cefaf7dc55bccd}{sm\+\_\+initialize}} (int n\+Files, char files\mbox{[}n\+Files\mbox{]}\mbox{[}\mbox{\hyperlink{probConst_8h_a0887cab1acf8e238e6777ab604ed7044}{MAX\+\_\+\+FILE\+\_\+\+NAME\+\_\+\+SIZE}}\mbox{]})
+\begin{DoxyCompactList}\small\item\em Shared memory initialization. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{sharedMemory_8c_acdba6eb2310386605ffaa530cd051dde}{sm\+\_\+close}} ()
+\begin{DoxyCompactList}\small\item\em Close shared memory. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{sharedMemory_8c_a9d9277eb29321a610be9bb461969fb2a}{sm\+\_\+get\+Chunk\+Of\+Data}} (int id, unsigned char data\mbox{[}\mbox{\hyperlink{probConst_8h_ab723c5f0e9759c70ed582dfd77431ff7}{DATA\+\_\+\+BUFFER\+\_\+\+SIZE}}\mbox{]}, unsigned int $\ast$size, \mbox{\hyperlink{sharedMemory_8h_ad4ae10927963f41e761481f4044ff509}{File\+Handler}} $\ast$file\+Handler)
+\begin{DoxyCompactList}\small\item\em retrieves a new chunk of data. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sharedMemory_8c_a989f3f908ac0b478b552d5a7056eabce}{sm\+\_\+register\+Result}} (int id, \mbox{\hyperlink{sharedMemory_8h_ad4ae10927963f41e761481f4044ff509}{File\+Handler}} file\+Handler, \mbox{\hyperlink{structsCount}{Count}} $\ast$count)
+\begin{DoxyCompactList}\small\item\em Registers the results of a file\textquotesingle{}s chunk of data. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sharedMemory_8c_a6db9192ad4993c3c2225f4a7f7fd6d8c}{sm\+\_\+get\+Results}} (\mbox{\hyperlink{structsResults}{Results}} $\ast$results)
+\begin{DoxyCompactList}\small\item\em Retrieve final results. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{sharedMemory_8c_aacc2e6de862cc619b0a65b8b8e8931bf}\label{sharedMemory_8c_aacc2e6de862cc619b0a65b8b8e8931bf}} 
+int {\bfseries status\+Workers} \mbox{[}\mbox{\hyperlink{probConst_8h_a0240ac851181b84ac374872dc5434ee4}{N}}\mbox{]}
+\begin{DoxyCompactList}\small\item\em worker threads return status array \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Shared memory implementations. 
+
+Synchronization based on monitors.
+
+Definition of the operations carried out by the workers\+: \begin{DoxyItemize}
+\item sm\+\_\+get\+Chunk\+Of\+Data \item sm\+\_\+register\+Result.\end{DoxyItemize}
+Definition of the operations carried out by the main thread\+: \begin{DoxyItemize}
+\item sm\+\_\+initialize \item sm\+\_\+close. \item sm\+\_\+get\+Results\end{DoxyItemize}
+\begin{DoxyAuthor}{Author}
+João Diogo Ferreira, João Tiago Rainho -\/ April 2022 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{sharedMemory_8c_acdba6eb2310386605ffaa530cd051dde}\label{sharedMemory_8c_acdba6eb2310386605ffaa530cd051dde}} 
+\index{sharedMemory.c@{sharedMemory.c}!sm\_close@{sm\_close}}
+\index{sm\_close@{sm\_close}!sharedMemory.c@{sharedMemory.c}}
+\doxysubsubsection{\texorpdfstring{sm\_close()}{sm\_close()}}
+{\footnotesize\ttfamily int sm\+\_\+close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Close shared memory. 
+
+Operation carried out by main thread Free shared memory resources.
+
+\begin{DoxyReturn}{Returns}
+FAILURE If an error occurs, otherwise SUCCESS 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{sharedMemory_8h_a6d58f9ac447476b4e084d7ca383f5183}{FAILURE}} 
+
+\mbox{\hyperlink{sharedMemory_8h_aa90cac659d18e8ef6294c7ae337f6b58}{SUCCESS}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{sharedMemory_8c_a9d9277eb29321a610be9bb461969fb2a}\label{sharedMemory_8c_a9d9277eb29321a610be9bb461969fb2a}} 
+\index{sharedMemory.c@{sharedMemory.c}!sm\_getChunkOfData@{sm\_getChunkOfData}}
+\index{sm\_getChunkOfData@{sm\_getChunkOfData}!sharedMemory.c@{sharedMemory.c}}
+\doxysubsubsection{\texorpdfstring{sm\_getChunkOfData()}{sm\_getChunkOfData()}}
+{\footnotesize\ttfamily bool sm\+\_\+get\+Chunk\+Of\+Data (\begin{DoxyParamCaption}\item[{int}]{id,  }\item[{unsigned char}]{data\mbox{[}\+DATA\+\_\+\+BUFFER\+\_\+\+SIZE\mbox{]},  }\item[{unsigned int $\ast$}]{size,  }\item[{\mbox{\hyperlink{sharedMemory_8h_ad4ae10927963f41e761481f4044ff509}{File\+Handler}} $\ast$}]{file\+Handler }\end{DoxyParamCaption})}
+
+
+
+retrieves a new chunk of data. 
+
+Operation carried out by worker thread. Then calling this function the worker is given and file\+Handler identifying the working file. The size of the chunk of data is always less or equal then DATA\+\_\+\+BUFFER\+\_\+\+SIZE. If there\textquotesingle{}s no more text to process no chunk of data is retrieved and this function returns false, the thread might end is execution.
+
+
+\begin{DoxyParams}[1]{Parameters}
+ & {\em id} & Worker thread id \\
+\hline
+\mbox{\texttt{ out}}  & {\em data} & Buffer containing the chunk of Data \\
+\hline
+\mbox{\texttt{ out}}  & {\em size} & The size of the chunk of Data \\
+\hline
+\mbox{\texttt{ out}}  & {\em file\+Handler} & Target processing file handler\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true If a new chunk was retrieve, otherwise false
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{probConst_8h_ab723c5f0e9759c70ed582dfd77431ff7}{DATA\+\_\+\+BUFFER\+\_\+\+SIZE}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{sharedMemory_8c_a6db9192ad4993c3c2225f4a7f7fd6d8c}\label{sharedMemory_8c_a6db9192ad4993c3c2225f4a7f7fd6d8c}} 
+\index{sharedMemory.c@{sharedMemory.c}!sm\_getResults@{sm\_getResults}}
+\index{sm\_getResults@{sm\_getResults}!sharedMemory.c@{sharedMemory.c}}
+\doxysubsubsection{\texorpdfstring{sm\_getResults()}{sm\_getResults()}}
+{\footnotesize\ttfamily void sm\+\_\+get\+Results (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structsResults}{Results}} $\ast$}]{results }\end{DoxyParamCaption})}
+
+
+
+Retrieve final results. 
+
+Operation carried out by main thread
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em results} & Array containing the results of each file \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{sharedMemory_8c_a103b9141e423a416c3cefaf7dc55bccd}\label{sharedMemory_8c_a103b9141e423a416c3cefaf7dc55bccd}} 
+\index{sharedMemory.c@{sharedMemory.c}!sm\_initialize@{sm\_initialize}}
+\index{sm\_initialize@{sm\_initialize}!sharedMemory.c@{sharedMemory.c}}
+\doxysubsubsection{\texorpdfstring{sm\_initialize()}{sm\_initialize()}}
+{\footnotesize\ttfamily int sm\+\_\+initialize (\begin{DoxyParamCaption}\item[{int}]{n\+Files,  }\item[{char}]{files\mbox{[}n\+Files\mbox{]}\mbox{[}\+MAX\+\_\+\+FILE\+\_\+\+NAME\+\_\+\+SIZE\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Shared memory initialization. 
+
+Operation carried out by main thread. This function initializes shared memory resources and it must be called before calling any other shared memory function.
+
+
+\begin{DoxyParams}{Parameters}
+{\em n\+Files} & Total number of files \\
+\hline
+{\em files} & Array containing the names of all files\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+FAILURE If an error occurs, otherwise SUCCESS 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{sharedMemory_8h_a6d58f9ac447476b4e084d7ca383f5183}{FAILURE}} 
+
+\mbox{\hyperlink{sharedMemory_8h_aa90cac659d18e8ef6294c7ae337f6b58}{SUCCESS}} 
+
+\mbox{\hyperlink{probConst_8h_a0887cab1acf8e238e6777ab604ed7044}{MAX\+\_\+\+FILE\+\_\+\+NAME\+\_\+\+SIZE}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{sharedMemory_8c_a989f3f908ac0b478b552d5a7056eabce}\label{sharedMemory_8c_a989f3f908ac0b478b552d5a7056eabce}} 
+\index{sharedMemory.c@{sharedMemory.c}!sm\_registerResult@{sm\_registerResult}}
+\index{sm\_registerResult@{sm\_registerResult}!sharedMemory.c@{sharedMemory.c}}
+\doxysubsubsection{\texorpdfstring{sm\_registerResult()}{sm\_registerResult()}}
+{\footnotesize\ttfamily void sm\+\_\+register\+Result (\begin{DoxyParamCaption}\item[{int}]{id,  }\item[{\mbox{\hyperlink{sharedMemory_8h_ad4ae10927963f41e761481f4044ff509}{File\+Handler}}}]{file\+Handler,  }\item[{\mbox{\hyperlink{structsCount}{Count}} $\ast$}]{count }\end{DoxyParamCaption})}
+
+
+
+Registers the results of a file\textquotesingle{}s chunk of data. 
+
+Operation carried out by worker thread. After processing a chunk of data the worker calls this function to register the results.
+
+
+\begin{DoxyParams}{Parameters}
+{\em id} & Worker thread id \\
+\hline
+{\em file\+Handler} & Target processing file handler \\
+\hline
+{\em count} & List of counting results \\
+\hline
+\end{DoxyParams}

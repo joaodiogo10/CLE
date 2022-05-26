@@ -1,0 +1,34 @@
+\hypertarget{textFiles_8h_source}{}\doxysection{text\+Files.\+h}
+\label{textFiles_8h_source}\index{/home/joao/Desktop/CLE/Praticas/Assignment2/src/textFiles.h@{/home/joao/Desktop/CLE/Praticas/Assignment2/src/textFiles.h}}
+\mbox{\hyperlink{textFiles_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#ifndef TEXT\_FILES\_H}}
+\DoxyCodeLine{2 \textcolor{preprocessor}{\#define TEXT\_FILES\_H}}
+\DoxyCodeLine{3 }
+\DoxyCodeLine{4 \textcolor{preprocessor}{\#include <stdbool.h>}}
+\DoxyCodeLine{5 \textcolor{preprocessor}{\#include <stdint.h>}}
+\DoxyCodeLine{6 \textcolor{preprocessor}{\#include <string.h>}}
+\DoxyCodeLine{7 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{probConst_8h}{probConst.h}}"{}}}
+\DoxyCodeLine{8 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{textFiles_8h}{textFiles.h}}"{}}}
+\DoxyCodeLine{9 }
+\DoxyCodeLine{22 \textcolor{preprocessor}{\#define SUCCESS 1}}
+\DoxyCodeLine{23 }
+\DoxyCodeLine{25 \textcolor{preprocessor}{\#define FAILURE 0}}
+\DoxyCodeLine{26 }
+\DoxyCodeLine{28 \textcolor{keyword}{typedef} \textcolor{keyword}{struct }\mbox{\hyperlink{structsFileHandler}{sFileHandler}} *\mbox{\hyperlink{textFiles_8h_ad4ae10927963f41e761481f4044ff509}{FileHandler}};}
+\DoxyCodeLine{29 }
+\DoxyCodeLine{35 \textcolor{keyword}{typedef} uint32\_t \mbox{\hyperlink{textFiles_8h_abac8cec6315f90bd845c93a8882fd48a}{Result}}[3]; }
+\DoxyCodeLine{36 }
+\DoxyCodeLine{50 \textcolor{keywordtype}{int} \mbox{\hyperlink{textFiles_8h_a4b64011f4e107d552347dcf9b1a98963}{tf\_initialize}}(\textcolor{keywordtype}{int} nFiles, \textcolor{keywordtype}{char} files[nFiles][\mbox{\hyperlink{probConst_8h_a0887cab1acf8e238e6777ab604ed7044}{MAX\_FILE\_NAME\_SIZE}}]);}
+\DoxyCodeLine{51 }
+\DoxyCodeLine{60 \textcolor{keywordtype}{int} \mbox{\hyperlink{textFiles_8h_a42a80bd7df1ca7aee601a45bb786fbce}{tf\_close}}();}
+\DoxyCodeLine{61 }
+\DoxyCodeLine{81 \textcolor{keywordtype}{int} \mbox{\hyperlink{textFiles_8h_ad09b1fbe81ccce5f8d485f153ffaae49}{tf\_readChunk}}(uint8\_t data[\mbox{\hyperlink{probConst_8h_ab723c5f0e9759c70ed582dfd77431ff7}{DATA\_BUFFER\_SIZE}}], \mbox{\hyperlink{structsFileHandler}{FileHandler}} *fileHandler, \textcolor{keywordtype}{bool}* moreWork);}
+\DoxyCodeLine{82 }
+\DoxyCodeLine{88 \textcolor{keywordtype}{void} \mbox{\hyperlink{textFiles_8h_ab5470d7b9c25a60c0a650b2141e1e2e1}{tf\_registerResult}}(\mbox{\hyperlink{structsFileHandler}{FileHandler}} fileHandler, \mbox{\hyperlink{textFiles_8h_abac8cec6315f90bd845c93a8882fd48a}{Result}} \mbox{\hyperlink{structsFileHandler_a14fc2db2c162392de5d376a198aa0ed5}{count}});}
+\DoxyCodeLine{89 }
+\DoxyCodeLine{94 \textcolor{keywordtype}{int} \mbox{\hyperlink{textFiles_8h_a7f9e9fb8cbc740876650fbf8f2a87d3a}{tf\_getResults}}(\mbox{\hyperlink{textFiles_8h_abac8cec6315f90bd845c93a8882fd48a}{Result}} *results);}
+\DoxyCodeLine{95 }
+\DoxyCodeLine{96 \textcolor{preprocessor}{\#endif }\textcolor{comment}{/* TEXT\_FILES\_H */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

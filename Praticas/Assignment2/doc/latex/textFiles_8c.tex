@@ -1,0 +1,156 @@
+\hypertarget{textFiles_8c}{}\doxysection{/home/joao/\+Desktop/\+CLE/\+Praticas/\+Assignment2/src/text\+Files.c File Reference}
+\label{textFiles_8c}\index{/home/joao/Desktop/CLE/Praticas/Assignment2/src/textFiles.c@{/home/joao/Desktop/CLE/Praticas/Assignment2/src/textFiles.c}}
+
+
+Text files implementation.  
+
+
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}text\+Files.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}utf8.\+h\char`\"{}}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structsFileHandler}{s\+File\+Handler}}
+\begin{DoxyCompactList}\small\item\em Information regarding a file and it\textquotesingle{}s counting results. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{textFiles_8c_a4b64011f4e107d552347dcf9b1a98963}{tf\+\_\+initialize}} (int n\+Files, char files\mbox{[}n\+Files\mbox{]}\mbox{[}\mbox{\hyperlink{probConst_8h_a0887cab1acf8e238e6777ab604ed7044}{MAX\+\_\+\+FILE\+\_\+\+NAME\+\_\+\+SIZE}}\mbox{]})
+\begin{DoxyCompactList}\small\item\em Text files initialization. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{textFiles_8c_a42a80bd7df1ca7aee601a45bb786fbce}{tf\+\_\+close}} ()
+\begin{DoxyCompactList}\small\item\em Close the text files. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{textFiles_8c_ad09b1fbe81ccce5f8d485f153ffaae49}{tf\+\_\+read\+Chunk}} (uint8\+\_\+t data\mbox{[}\mbox{\hyperlink{probConst_8h_ab723c5f0e9759c70ed582dfd77431ff7}{DATA\+\_\+\+BUFFER\+\_\+\+SIZE}}\mbox{]}, \mbox{\hyperlink{textFiles_8h_ad4ae10927963f41e761481f4044ff509}{File\+Handler}} $\ast$file\+Handler, bool $\ast$more\+Work)
+\begin{DoxyCompactList}\small\item\em retrieves a new chunk of data. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{textFiles_8c_ab5470d7b9c25a60c0a650b2141e1e2e1}{tf\+\_\+register\+Result}} (\mbox{\hyperlink{textFiles_8h_ad4ae10927963f41e761481f4044ff509}{File\+Handler}} file\+Handler, \mbox{\hyperlink{textFiles_8h_abac8cec6315f90bd845c93a8882fd48a}{Result}} count)
+\begin{DoxyCompactList}\small\item\em Registers the results of a file\textquotesingle{}s chunk of data. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{textFiles_8c_a7f9e9fb8cbc740876650fbf8f2a87d3a}{tf\+\_\+get\+Results}} (\mbox{\hyperlink{textFiles_8h_abac8cec6315f90bd845c93a8882fd48a}{Result}} $\ast$results)
+\begin{DoxyCompactList}\small\item\em Retrieve final results. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Text files implementation. 
+
+This code is responsible to fetch chunks from the text files, keeping track of the current file being processed and to register the results of each file. \begin{DoxyAuthor}{Author}
+João Diogo Ferreira, João Tiago Rainho -\/ May 2022 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{textFiles_8c_a42a80bd7df1ca7aee601a45bb786fbce}\label{textFiles_8c_a42a80bd7df1ca7aee601a45bb786fbce}} 
+\index{textFiles.c@{textFiles.c}!tf\_close@{tf\_close}}
+\index{tf\_close@{tf\_close}!textFiles.c@{textFiles.c}}
+\doxysubsubsection{\texorpdfstring{tf\_close()}{tf\_close()}}
+{\footnotesize\ttfamily int tf\+\_\+close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Close the text files. 
+
+Free text files resources.
+
+\begin{DoxyReturn}{Returns}
+FAILURE If an error occurs, otherwise SUCCESS 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{textFiles_8h_a6d58f9ac447476b4e084d7ca383f5183}{FAILURE}} 
+
+\mbox{\hyperlink{textFiles_8h_aa90cac659d18e8ef6294c7ae337f6b58}{SUCCESS}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{textFiles_8c_a7f9e9fb8cbc740876650fbf8f2a87d3a}\label{textFiles_8c_a7f9e9fb8cbc740876650fbf8f2a87d3a}} 
+\index{textFiles.c@{textFiles.c}!tf\_getResults@{tf\_getResults}}
+\index{tf\_getResults@{tf\_getResults}!textFiles.c@{textFiles.c}}
+\doxysubsubsection{\texorpdfstring{tf\_getResults()}{tf\_getResults()}}
+{\footnotesize\ttfamily int tf\+\_\+get\+Results (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{textFiles_8h_abac8cec6315f90bd845c93a8882fd48a}{Result}} $\ast$}]{results }\end{DoxyParamCaption})}
+
+
+
+Retrieve final results. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em results} & Array containing the results of each file \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{textFiles_8c_a4b64011f4e107d552347dcf9b1a98963}\label{textFiles_8c_a4b64011f4e107d552347dcf9b1a98963}} 
+\index{textFiles.c@{textFiles.c}!tf\_initialize@{tf\_initialize}}
+\index{tf\_initialize@{tf\_initialize}!textFiles.c@{textFiles.c}}
+\doxysubsubsection{\texorpdfstring{tf\_initialize()}{tf\_initialize()}}
+{\footnotesize\ttfamily int tf\+\_\+initialize (\begin{DoxyParamCaption}\item[{int}]{n\+Files,  }\item[{char}]{files\mbox{[}n\+Files\mbox{]}\mbox{[}\+MAX\+\_\+\+FILE\+\_\+\+NAME\+\_\+\+SIZE\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Text files initialization. 
+
+This function initializes text files resources and it must be called before calling any other function.
+
+
+\begin{DoxyParams}{Parameters}
+{\em n\+Files} & Total number of files \\
+\hline
+{\em files} & Array containing the names of all files\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+FAILURE If an error occurs, otherwise SUCCESS 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{textFiles_8h_a6d58f9ac447476b4e084d7ca383f5183}{FAILURE}} 
+
+\mbox{\hyperlink{textFiles_8h_aa90cac659d18e8ef6294c7ae337f6b58}{SUCCESS}} 
+
+\mbox{\hyperlink{probConst_8h_a0887cab1acf8e238e6777ab604ed7044}{MAX\+\_\+\+FILE\+\_\+\+NAME\+\_\+\+SIZE}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{textFiles_8c_ad09b1fbe81ccce5f8d485f153ffaae49}\label{textFiles_8c_ad09b1fbe81ccce5f8d485f153ffaae49}} 
+\index{textFiles.c@{textFiles.c}!tf\_readChunk@{tf\_readChunk}}
+\index{tf\_readChunk@{tf\_readChunk}!textFiles.c@{textFiles.c}}
+\doxysubsubsection{\texorpdfstring{tf\_readChunk()}{tf\_readChunk()}}
+{\footnotesize\ttfamily int tf\+\_\+read\+Chunk (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{data\mbox{[}\+DATA\+\_\+\+BUFFER\+\_\+\+SIZE\mbox{]},  }\item[{\mbox{\hyperlink{textFiles_8h_ad4ae10927963f41e761481f4044ff509}{File\+Handler}} $\ast$}]{file\+Handler,  }\item[{bool $\ast$}]{more\+Work }\end{DoxyParamCaption})}
+
+
+
+retrieves a new chunk of data. 
+
+The size of the chunk of data is always less or equal then DATA\+\_\+\+BUFFER\+\_\+\+SIZE -\/ 2. If there\textquotesingle{}s no more text to process no chunk of data is retrieved and this function returns false, the thread might end is execution. The size of the chunk is store in the last 2 bytes of the array.
+
+data\mbox{[}DATA\+\_\+\+BUFFER\+\_\+\+SIZE -\/ 1\mbox{]} is the MSB.
+
+data\mbox{[}DATA\+\_\+\+BUFFER\+\_\+\+SIZE -\/ 2\mbox{]} is the LSB.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em data} & Buffer containing the chunk of Data \\
+\hline
+\mbox{\texttt{ out}}  & {\em file\+Handler} & Target processing file handler \\
+\hline
+\mbox{\texttt{ out}}  & {\em more\+Work} & True if there is more data\+Chunks. False, otherwise.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+FAILURE If an error occurs, otherwise SUCCESS 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{textFiles_8h_a6d58f9ac447476b4e084d7ca383f5183}{FAILURE}} 
+
+\mbox{\hyperlink{textFiles_8h_aa90cac659d18e8ef6294c7ae337f6b58}{SUCCESS}} 
+
+\mbox{\hyperlink{probConst_8h_ab723c5f0e9759c70ed582dfd77431ff7}{DATA\+\_\+\+BUFFER\+\_\+\+SIZE}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{textFiles_8c_ab5470d7b9c25a60c0a650b2141e1e2e1}\label{textFiles_8c_ab5470d7b9c25a60c0a650b2141e1e2e1}} 
+\index{textFiles.c@{textFiles.c}!tf\_registerResult@{tf\_registerResult}}
+\index{tf\_registerResult@{tf\_registerResult}!textFiles.c@{textFiles.c}}
+\doxysubsubsection{\texorpdfstring{tf\_registerResult()}{tf\_registerResult()}}
+{\footnotesize\ttfamily void tf\+\_\+register\+Result (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{textFiles_8h_ad4ae10927963f41e761481f4044ff509}{File\+Handler}}}]{file\+Handler,  }\item[{\mbox{\hyperlink{textFiles_8h_abac8cec6315f90bd845c93a8882fd48a}{Result}}}]{count }\end{DoxyParamCaption})}
+
+
+
+Registers the results of a file\textquotesingle{}s chunk of data. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em file\+Handler} & Target processing file handler \\
+\hline
+{\em count} & List of counting results \\
+\hline
+\end{DoxyParams}

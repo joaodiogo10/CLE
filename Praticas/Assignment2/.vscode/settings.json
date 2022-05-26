@@ -4,6 +4,7 @@
         "mpi.h": "c",
         "probconst.h": "c",
         "pthread.h": "c",
-        "textfiles.h": "c"
+        "textfiles.h": "c",
+        "errno.h": "c"
     }
 }

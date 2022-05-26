@@ -1,0 +1,89 @@
+\hypertarget{fifo_8h}{}\doxysection{/home/joao/\+Desktop/\+CLE/\+Praticas/\+Assignment2/src/fifo.h File Reference}
+\label{fifo_8h}\index{/home/joao/Desktop/CLE/Praticas/Assignment2/src/fifo.h@{/home/joao/Desktop/CLE/Praticas/Assignment2/src/fifo.h}}
+
+
+Fifo that store data chunks to be processed.  
+
+
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}prob\+Const.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}text\+Files.\+h\char`\"{}}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structsChunk}{s\+Chunk}}
+\begin{DoxyCompactList}\small\item\em Data chunk process by a worker a respective file handler. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{fifo_8h_a5f196d04a90bcae0ebc4368f7369cbc1}\label{fifo_8h_a5f196d04a90bcae0ebc4368f7369cbc1}} 
+typedef struct \mbox{\hyperlink{structsChunk}{s\+Chunk}} {\bfseries Chunk}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{fifo_8h_ad2821b4fb82d40239d217ec998081ad3}{put\+Chunk}} (\mbox{\hyperlink{structsChunk}{Chunk}} $\ast$data)
+\begin{DoxyCompactList}\small\item\em Inserts a data chunk into fifo. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{fifo_8h_ad4703c1bda0f307ecc27b21ba9663a93}{get\+Chunk}} (unsigned int proxy\+Id, \mbox{\hyperlink{structsChunk}{Chunk}} $\ast$$\ast$data)
+\begin{DoxyCompactList}\small\item\em Fetches a data chunk from the fifo. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{fifo_8h_ad25ddc7f6c296f23f3b656da5084b544}{done\+Reading}} ()
+\begin{DoxyCompactList}\small\item\em Indication that all files have been read. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Fifo that store data chunks to be processed. 
+
+header
+
+\begin{DoxyAuthor}{Author}
+João Diogo Ferreira, João Tiago Rainho -\/ May 2022 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{fifo_8h_ad25ddc7f6c296f23f3b656da5084b544}\label{fifo_8h_ad25ddc7f6c296f23f3b656da5084b544}} 
+\index{fifo.h@{fifo.h}!doneReading@{doneReading}}
+\index{doneReading@{doneReading}!fifo.h@{fifo.h}}
+\doxysubsubsection{\texorpdfstring{doneReading()}{doneReading()}}
+{\footnotesize\ttfamily void done\+Reading (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Indication that all files have been read. 
+
+Called by the reading thread to signal dispatcher that there is no more chunks of data. \mbox{\Hypertarget{fifo_8h_ad4703c1bda0f307ecc27b21ba9663a93}\label{fifo_8h_ad4703c1bda0f307ecc27b21ba9663a93}} 
+\index{fifo.h@{fifo.h}!getChunk@{getChunk}}
+\index{getChunk@{getChunk}!fifo.h@{fifo.h}}
+\doxysubsubsection{\texorpdfstring{getChunk()}{getChunk()}}
+{\footnotesize\ttfamily bool get\+Chunk (\begin{DoxyParamCaption}\item[{unsigned int}]{proxy\+Id,  }\item[{\mbox{\hyperlink{structsChunk}{Chunk}} $\ast$$\ast$}]{data }\end{DoxyParamCaption})}
+
+
+
+Fetches a data chunk from the fifo. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em data} & chunk of data pinter. \\
+\hline
+\mbox{\texttt{ in}}  & {\em proxy\+Id} & Proxy thread id. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if there are more chunk of data to retrieve. False otherwise. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{fifo_8h_ad2821b4fb82d40239d217ec998081ad3}\label{fifo_8h_ad2821b4fb82d40239d217ec998081ad3}} 
+\index{fifo.h@{fifo.h}!putChunk@{putChunk}}
+\index{putChunk@{putChunk}!fifo.h@{fifo.h}}
+\doxysubsubsection{\texorpdfstring{putChunk()}{putChunk()}}
+{\footnotesize\ttfamily void put\+Chunk (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structsChunk}{Chunk}} $\ast$}]{data }\end{DoxyParamCaption})}
+
+
+
+Inserts a data chunk into fifo. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em data} & array containing a chunk of data. \\
+\hline
+\end{DoxyParams}

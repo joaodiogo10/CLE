@@ -1,0 +1,30 @@
+\hypertarget{utf8_8h_source}{}\doxysection{utf8.\+h}
+\label{utf8_8h_source}\index{/home/joao/Desktop/CLE/Praticas/Assignment2/src/utf8.h@{/home/joao/Desktop/CLE/Praticas/Assignment2/src/utf8.h}}
+\mbox{\hyperlink{utf8_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{1 \textcolor{preprocessor}{\#ifndef UTF8\_H}}
+\DoxyCodeLine{2 \textcolor{preprocessor}{\#define UTF8\_H}}
+\DoxyCodeLine{3 }
+\DoxyCodeLine{4 \textcolor{preprocessor}{\#include <stdio.h>}}
+\DoxyCodeLine{5 }
+\DoxyCodeLine{18 \textcolor{keyword}{enum} \mbox{\hyperlink{utf8_8h_ad0cd52c7c9b13be13f9aafebd2e1c860}{CharacterType}}}
+\DoxyCodeLine{19 \{}
+\DoxyCodeLine{20     CONSOANT,}
+\DoxyCodeLine{21     UNDERSCORE,}
+\DoxyCodeLine{22     VOWEL,}
+\DoxyCodeLine{23     DIGIT,}
+\DoxyCodeLine{24     APOSTROPHE,}
+\DoxyCodeLine{25     DELIMITER,}
+\DoxyCodeLine{26     EOFILE,}
+\DoxyCodeLine{27     NOT\_DEFINED}
+\DoxyCodeLine{28 \};}
+\DoxyCodeLine{29 }
+\DoxyCodeLine{38 \textcolor{keywordtype}{int} \mbox{\hyperlink{utf8_8h_a94224cdc20386a7622f80a4ab332da9e}{readUTF8Char}}(FILE *ptrFile, \textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{int} *utf8Char);}
+\DoxyCodeLine{39 }
+\DoxyCodeLine{46 \textcolor{keyword}{enum} \mbox{\hyperlink{utf8_8h_ad0cd52c7c9b13be13f9aafebd2e1c860}{CharacterType}} \mbox{\hyperlink{utf8_8h_a4bf9a33f1f7bfbdb3bdeade66d20a177}{getUTF8CharType}}(\textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{int} utf8Char);}
+\DoxyCodeLine{47 }
+\DoxyCodeLine{56 \textcolor{keywordtype}{int} \mbox{\hyperlink{utf8_8h_aa7aea4870ac31427fedc29ec6c98e3d1}{getUTF8CharSize}}(\textcolor{keywordtype}{unsigned} \textcolor{keywordtype}{char} firstByte);}
+\DoxyCodeLine{57 }
+\DoxyCodeLine{58 \textcolor{preprocessor}{\#endif }\textcolor{comment}{/* UTF8\_H */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

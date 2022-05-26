@@ -1,1 +1,1 @@
-mpicc -Wall main.c fifo.c textFiles.c utf8.c -o main -lpthread
+mpicc -Wall src/main.c src/fifo.c src/textFiles.c src/utf8.c -o main -lpthread

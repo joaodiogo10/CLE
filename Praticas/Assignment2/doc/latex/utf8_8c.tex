@@ -1,0 +1,103 @@
+\hypertarget{utf8_8c}{}\doxysection{/home/joao/\+Desktop/\+CLE/\+Praticas/\+Assignment2/src/utf8.c File Reference}
+\label{utf8_8c}\index{/home/joao/Desktop/CLE/Praticas/Assignment2/src/utf8.c@{/home/joao/Desktop/CLE/Praticas/Assignment2/src/utf8.c}}
+
+
+UTF8 character processing library implementation.  
+
+
+{\ttfamily \#include \char`\"{}utf8.\+h\char`\"{}}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{utf8_8c_af74916bbcb85674fac800633bf2b7fd7}\label{utf8_8c_af74916bbcb85674fac800633bf2b7fd7}} 
+\#define {\bfseries ASCII\+\_\+\+FIRST\+\_\+\+UPPER\+\_\+\+CASE\+\_\+\+LETTER}~0x41
+\begin{DoxyCompactList}\small\item\em First upper case letter in ascii codification. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{utf8_8c_a523317c255e5ac9257b7051fce37d82b}\label{utf8_8c_a523317c255e5ac9257b7051fce37d82b}} 
+\#define {\bfseries ASCII\+\_\+\+LAST\+\_\+\+UPPER\+\_\+\+CASE\+\_\+\+LETTER}~0x5A
+\begin{DoxyCompactList}\small\item\em Last upper case letter in ascii codification. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{utf8_8c_a8cda90f0ec8e17427170dd6359dd8ac8}\label{utf8_8c_a8cda90f0ec8e17427170dd6359dd8ac8}} 
+\#define {\bfseries ASCII\+\_\+\+FIRST\+\_\+\+LOWER\+\_\+\+CASE\+\_\+\+LETTER}~0x61
+\begin{DoxyCompactList}\small\item\em First lower case letter in ascii codification. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{utf8_8c_a3a4b40f3f9667061888adff0e7044113}\label{utf8_8c_a3a4b40f3f9667061888adff0e7044113}} 
+\#define {\bfseries ASCII\+\_\+\+LAST\+\_\+\+LOWER\+\_\+\+CASE\+\_\+\+LETTER}~0x7A
+\begin{DoxyCompactList}\small\item\em Last lower case letter in ascii codification. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{utf8_8c_a94224cdc20386a7622f80a4ab332da9e}{read\+UTF8\+Char}} (FILE $\ast$ptr\+File, unsigned int $\ast$utf8\+Char)
+\begin{DoxyCompactList}\small\item\em Reads next utf8 character in the file stream. \end{DoxyCompactList}\item 
+enum \mbox{\hyperlink{utf8_8h_ad0cd52c7c9b13be13f9aafebd2e1c860}{Character\+Type}} \mbox{\hyperlink{utf8_8c_a4bf9a33f1f7bfbdb3bdeade66d20a177}{get\+UTF8\+Char\+Type}} (unsigned int utf8\+Char)
+\begin{DoxyCompactList}\small\item\em Determines the character type of an utf8 character. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{utf8_8c_aa7aea4870ac31427fedc29ec6c98e3d1}{get\+UTF8\+Char\+Size}} (unsigned char first\+Byte)
+\begin{DoxyCompactList}\small\item\em Determines the size of an utf8 character through its first byte. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+UTF8 character processing library implementation. 
+
+Provides a set of useful functions in processing of UTF8 characters.
+
+\begin{DoxyAuthor}{Author}
+João Diogo Ferreira, João Tiago Rainho -\/ May 2022 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{utf8_8c_aa7aea4870ac31427fedc29ec6c98e3d1}\label{utf8_8c_aa7aea4870ac31427fedc29ec6c98e3d1}} 
+\index{utf8.c@{utf8.c}!getUTF8CharSize@{getUTF8CharSize}}
+\index{getUTF8CharSize@{getUTF8CharSize}!utf8.c@{utf8.c}}
+\doxysubsubsection{\texorpdfstring{getUTF8CharSize()}{getUTF8CharSize()}}
+{\footnotesize\ttfamily int get\+UTF8\+Char\+Size (\begin{DoxyParamCaption}\item[{unsigned char}]{first\+Byte }\end{DoxyParamCaption})}
+
+
+
+Determines the size of an utf8 character through its first byte. 
+
+The size of a utf8 character can range from 1 to 4 bytes. The first bit most follow a valid utf8 encoding format.
+
+
+\begin{DoxyParams}{Parameters}
+{\em first\+Byte} & utf8 character first byte \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The size of the utf8 character or 0 in case of an invalid encoding format 
+\end{DoxyReturn}
+\mbox{\Hypertarget{utf8_8c_a4bf9a33f1f7bfbdb3bdeade66d20a177}\label{utf8_8c_a4bf9a33f1f7bfbdb3bdeade66d20a177}} 
+\index{utf8.c@{utf8.c}!getUTF8CharType@{getUTF8CharType}}
+\index{getUTF8CharType@{getUTF8CharType}!utf8.c@{utf8.c}}
+\doxysubsubsection{\texorpdfstring{getUTF8CharType()}{getUTF8CharType()}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{utf8_8h_ad0cd52c7c9b13be13f9aafebd2e1c860}{Character\+Type}} get\+UTF8\+Char\+Type (\begin{DoxyParamCaption}\item[{unsigned int}]{utf8\+Char }\end{DoxyParamCaption})}
+
+
+
+Determines the character type of an utf8 character. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em utf8\+Char} & utf8 character\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+corresponding enum character type 
+\end{DoxyReturn}
+\mbox{\Hypertarget{utf8_8c_a94224cdc20386a7622f80a4ab332da9e}\label{utf8_8c_a94224cdc20386a7622f80a4ab332da9e}} 
+\index{utf8.c@{utf8.c}!readUTF8Char@{readUTF8Char}}
+\index{readUTF8Char@{readUTF8Char}!utf8.c@{utf8.c}}
+\doxysubsubsection{\texorpdfstring{readUTF8Char()}{readUTF8Char()}}
+{\footnotesize\ttfamily int read\+UTF8\+Char (\begin{DoxyParamCaption}\item[{FILE $\ast$}]{ptr\+File,  }\item[{unsigned int $\ast$}]{utf8\+Char }\end{DoxyParamCaption})}
+
+
+
+Reads next utf8 character in the file stream. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+ & {\em ptr\+File} & pointer to the file stream \\
+\hline
+\mbox{\texttt{ out}}  & {\em utf8\+Char} & pointer to read utf8 character\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The size of the utf8 character, 0 in case EOF is read from the file stream or -\/1 in case of an encoding error or an error reading from the file stream 
+\end{DoxyReturn}
