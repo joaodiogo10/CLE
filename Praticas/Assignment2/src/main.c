@@ -73,7 +73,6 @@ int main(int argc, char *argv[])
     }
 
     nWorkers = nProc - 1;
-
     //------------------------
     //-------Dispatcher-------
     //------------------------
@@ -85,7 +84,7 @@ int main(int argc, char *argv[])
             if (strlen(argv[i + 1]) > MAX_FILE_NAME_SIZE)
             {
                 fprintf(stderr, "File path is too long!\n");
-                for(int n = 1; n < nProc; n++)
+                for(int n = 1; n <= nWorkers; n++)
                     sendTerminationCondition(n);
                 MPI_Finalize();
                 exit(EXIT_FAILURE);
@@ -97,7 +96,7 @@ int main(int argc, char *argv[])
         if (status == FAILURE)
         {
             fprintf(stderr, "Failed to initialize text files!\n");
-            for(int n = 1; n < nProc; n++)
+            for(int n = 1; n <= nWorkers; n++)
                 sendTerminationCondition(n);
             MPI_Finalize();
             exit(EXIT_FAILURE);
@@ -108,7 +107,7 @@ int main(int argc, char *argv[])
         if(statusProxyThread == NULL)
         {
             fprintf(stderr  , "Failed to alocate proxies return status storage\n");
-            for(int n = 1; n < nProc; n++)
+            for(int n = 1; n <= nWorkers; n++)
                 sendTerminationCondition(n);
             MPI_Finalize();
             exit(EXIT_FAILURE);
@@ -123,7 +122,7 @@ int main(int argc, char *argv[])
         if (pthread_create(&readingThread, NULL, codeReadingThread, NULL) != 0)
         {
             fprintf(stdout, "Error on creating reader thread\n");
-            for(int n = 1; n < nProc; n++)
+            for(int n = 1; n <= nWorkers; n++)
                 sendTerminationCondition(n);
             MPI_Finalize();
             exit(EXIT_FAILURE);
@@ -136,11 +135,13 @@ int main(int argc, char *argv[])
         for (int i = 0; i < nWorkers; i++)
         {
             workerIDs[i] = i + 1;
-            if (pthread_create(&proxyThread[i], NULL, codeProxyThread, (void *)&workerIDs[i])  != 0)
+            if (pthread_create(&proxyThread[i], NULL, codeProxyThread, (void *)&workerIDs[i]) != 0)
             {
-                fprintf(stdout, "Error on creating worker thread\n");
-                for(int n = 1; n < nProc; n++)
+                fprintf(stdout, "Error on creating proxy thread\n");
+                for(int n = i + 1; n <= nWorkers; n++)
                     sendTerminationCondition(n);
+
+                doneReading();
                 MPI_Finalize();
                 exit(EXIT_FAILURE);
             }
@@ -148,6 +149,7 @@ int main(int argc, char *argv[])
 
         // wait for reading threads
         int *executionStatus;
+        bool success = true;
         if(pthread_join(readingThread, (void *) &executionStatus) != 0)
         {
             fprintf(stdout, "Error on waiting reader thread\n");
@@ -156,6 +158,8 @@ int main(int argc, char *argv[])
         }
         printf("thread reader, has terminated: ");
         printf("its status was %d\n", *executionStatus);
+        if(*executionStatus != 0)
+            success = false;
 
         // join working threads
         for (int i = 0; i < nWorkers; i++)
@@ -168,25 +172,35 @@ int main(int argc, char *argv[])
             }
             printf("thread proxy, with id %u, has terminated: ", i);
             printf("its status was %d\n", *executionStatus);
+            if(*executionStatus != 0)
+                success = false;
         }
 
         // Determine executing time
         clock_gettime(CLOCK_MONOTONIC, &endTime);
         printf("\nElapsed time = %.6f s\n", (endTime.tv_sec - startTime.tv_sec) / 1.0 + (endTime.tv_nsec - startTime.tv_nsec) / 1000000000.0);
 
-        // Print results
-        Result results[nFiles];
-        tf_getResults(results);
-        for (int i = 0; i < nFiles; i++)
-        {
-            fprintf(stdout,
-                    "\nFile name: %s\n"
-                    "Total number of words = %d\n"
-                    "N. of words beginning with a vowel = %d\n"
-                    "N. of words ending with a consonant = %d\n",
-                    fileNames[i], results[i][2], results[i][1], results[i][0]);
-        }
 
+        // Print results
+        if(success)
+        {
+            Result results[nFiles];
+            tf_getResults(results);
+            for (int i = 0; i < nFiles; i++)
+            {
+                fprintf(stdout,
+                        "\nFile name: %s\n"
+                        "Total number of words = %d\n"
+                        "N. of words beginning with a vowel = %d\n"
+                        "N. of words ending with a consonant = %d\n",
+                        fileNames[i], results[i][2], results[i][1], results[i][0]);
+            }
+        }
+        else
+        {
+            fprintf(stderr, "Unable to get results something went wrong during the execution of the threads\n");
+        }
+        
         tf_close();
     }
 
@@ -326,7 +340,7 @@ void *codeReadingThread(void *args)
         if (status == FAILURE)
         {
             fprintf(stderr, "Error reading data chunk!\n");
-            MPI_Finalize();
+            doneReading();
             statusReadingThread = EXIT_FAILURE;
             pthread_exit(&statusReadingThread);
         }
