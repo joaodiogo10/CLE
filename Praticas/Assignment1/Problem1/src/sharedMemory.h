@@ -2,6 +2,7 @@
 #define SHARED_MEMORY_H
 
 #include "probConst.h"
+
 /**
  *  \file sharedMemory.h
  *

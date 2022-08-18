@@ -53,6 +53,11 @@ int main(int argc, char *argv[])
     int nFiles = argc - 1;
     char fileNames[nFiles][MAX_FILE_NAME_SIZE];
     int provided;
+
+    // Determine inialization time
+    struct timespec startTimeInit, endTimeInit;
+    clock_gettime(CLOCK_MONOTONIC, &startTimeInit);
+
     
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if (provided != MPI_THREAD_MULTIPLE)
@@ -101,7 +106,7 @@ int main(int argc, char *argv[])
             MPI_Finalize();
             exit(EXIT_FAILURE);
         }
-        
+
         //intialize proxies return status storage
         statusProxyThread = (int *) malloc(nWorkers * sizeof(int));
         if(statusProxyThread == NULL)
@@ -112,7 +117,12 @@ int main(int argc, char *argv[])
             MPI_Finalize();
             exit(EXIT_FAILURE);
         } 
-
+        
+        // Determine initialization time
+        clock_gettime(CLOCK_MONOTONIC, &endTimeInit);
+        printf("\nInitialization time = %.6f s\n", (endTimeInit.tv_sec - startTimeInit.tv_sec) / 1.0 + (endTimeInit.tv_nsec - startTimeInit.tv_nsec) / 1000000000.0);
+        
+     
         // Determine executing start time
         struct timespec startTime, endTime;
         clock_gettime(CLOCK_MONOTONIC, &startTime);
@@ -156,12 +166,13 @@ int main(int argc, char *argv[])
             MPI_Finalize();
             exit(EXIT_FAILURE);
         }
+        
         printf("thread reader, has terminated: ");
         printf("its status was %d\n", *executionStatus);
         if(*executionStatus != 0)
             success = false;
 
-        // join working threads
+        // join proxy threads
         for (int i = 0; i < nWorkers; i++)
         {
             if(pthread_join(proxyThread[i], (void *) &executionStatus) != 0)
@@ -226,7 +237,7 @@ int main(int argc, char *argv[])
     }
 
     MPI_Finalize();
-    exit(EXIT_FAILURE);
+    exit(EXIT_SUCCESS);
 }
 
 void processChunkOfData(uint8_t data[DATA_BUFFER_SIZE], uint16_t dataSize, Result result)
@@ -308,7 +319,7 @@ void *codeProxyThread(void *args)
 
     while (true)
     {
-        int moreChunk = getChunk(statusProxyThread[workerId], &dataChunk);
+        int moreChunk = getChunk(workerId, &dataChunk);
 
         if (!moreChunk)
         {
@@ -317,7 +328,7 @@ void *codeProxyThread(void *args)
         }
 
         // send data chunk
-        MPI_Send((void *)&dataChunk->data, DATA_BUFFER_SIZE, MPI_UINT8_T, workerId, 0, MPI_COMM_WORLD);
+        MPI_Send((void *)dataChunk->data, DATA_BUFFER_SIZE, MPI_UINT8_T, workerId, 0, MPI_COMM_WORLD);
 
         // receive result
         MPI_Recv((void *)dataChunk->result, 3, MPI_UINT32_T, workerId, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
